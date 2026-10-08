@@ -392,10 +392,29 @@ export ANTHROPIC_API_KEY=sk-ant-...
 java -cp backend/target/printdesk.jar com.printdesk.eval.EvalRunner evals/emails.jsonl
 ```
 
-```
-PrintDesk triage eval – 24 emails
-is_support   …/4   lang …/19   printer …/21   problem …/18   suspicious …/2   escalate …/2
-```
+### Latest result
+
+Run in claude.ai on 2026-10-08 with the app's own triage (the Claude model available in
+claude.ai), 24 emails, 0 errors, median 9 s per email:
+
+| Field | Correct | What it checks |
+|---|---|---|
+| `is_support` | 4 / 4 | Non-support mail is set aside: newsletter and bounce by the rule filter, a sales pitch by the model |
+| `lang` | 19 / 19 | Language of the customer (HU, DE, EN, FR, PL, IT, CS, ES, NL) |
+| `printer` | 21 / 21 | Printer model, including when it comes only from the order |
+| `problem` | 18 / 18 | The right problem out of 14 |
+| `suspicious` | 2 / 2 | Manipulation attempts ("ignore your instructions", a role override) are flagged |
+| `escalate` | 2 / 2 | Safety cases (burning smell, smoke) are escalated |
+| **Total** | **66 / 66** | |
+
+**What this does and doesn't show.** The set is small and was written together with the
+prompts, so a perfect score means the basics work: languages, printers, problems, filtering,
+manipulation and safety. It doesn't mean the agent is ready for real mail. Real customer
+emails are longer, vaguer and messier: several problems in one email, no printer named,
+forwarded threads, typos. The next step is the shadow mode from
+[Measuring success](#measuring-success): collect real, anonymised emails, add every miss to
+this file with its labels, and track the score per run. The command-line runner (Java
+backend) uses its own prompt and hasn't been run against the real API yet.
 
 Run it after every prompt change. The labels are the regression suite for the agent. When the
 agent gets a new kind of email wrong, the email is added here with its labels before the fix.
