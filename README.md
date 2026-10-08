@@ -31,11 +31,24 @@ the customer.
 
 ### Demo video
 
-![PrintDesk demo: emails arrive, the AI triages them, a colleague approves the reply, the customer confirms the fix, and the statistics update](docs/media/printdesk-demo.gif)
+![PrintDesk demo: on the left the support team, on the right the customer's mailbox. The customer emails the shop, PrintDesk picks it up and drafts a reply, a colleague sends it, the customer answers, and PrintDesk picks up the answer by itself](docs/media/printdesk-demo.gif)
 
-*90 seconds, with captions. [Full-quality video (MP4)](docs/media/printdesk-demo.mp4).
-The triage of the six demo emails comes from a real run and is replayed, so the video always
-shows the same result. The shortened reply and the answer to the follow-up are scripted.*
+**The whole email loop, end to end**, on a split screen: the support team on the left and the
+customer's mailbox on the right.
+
+1. Péter emails the shop's support address.
+2. PrintDesk picks the email up by itself, with no copying and pasting, and prepares the ticket
+   and a reply draft.
+3. A colleague approves and sends the reply as a real email in the same thread.
+4. Péter receives it in his mailbox, tries the steps and writes back.
+5. PrintDesk picks up his answer by itself, sees that the problem is solved, and the ticket is
+   closed.
+
+*About 2 minutes, with captions. [Full-quality video (MP4)](docs/media/printdesk-demo.mp4).
+The video was recorded with the local version, where a built-in demo mailbox stands in for
+Gmail. In claude.ai the same steps run on the shop's real Gmail account. The triage of the six
+demo emails comes from a real run and is replayed, so the video always shows the same result.
+The shortened reply and the answer to the follow-up are scripted.*
 
 ---
 
@@ -53,11 +66,16 @@ to deliver next week, so this is urgent."*
 (The AMS is the box on top of the printer that holds several filament spools and feeds them
 in automatically.) The same example runs in the demo video above.
 
-**1. The email arrives and becomes a ticket.**
-PrintDesk checks the support mailbox every minute. Each new email becomes a *ticket*: a case
+**1. The email arrives and becomes a ticket, without anyone touching it.**
+Péter writes an ordinary email, like to any shop. PrintDesk checks the support mailbox every
+minute and picks up new emails by itself. Nobody has to copy or forward anything. Each new
+email becomes a *ticket*: a case
 card that collects everything about Péter's problem. Mail that isn't a support request, such as
 newsletters, automatic "I'm on holiday" replies and bounced emails, is set aside automatically,
 so nobody wastes time on it.
+
+![Left: the support inbox. Right: Péter writing his email to the support address](docs/screenshots/mail-1-customer-writes.png)
+*Right: Péter writes his email. Left: the support inbox, which picks it up a moment later.*
 
 **2. The AI reads it and works out what is going on.**
 The AI reads the email the way an experienced colleague would and notes:
@@ -122,20 +140,30 @@ draft. They can:
 *The draft in Hungarian after the colleague asked for "Legyen rövidebb" (make it shorter). One
 click on **Approve**, then **Send**.*
 
-The reply goes back to Péter in the same email thread. Instead of searching through the
+The reply goes out as a **real email** to Péter, in the same email thread, so he sees the
+whole conversation in his own mailbox.
+
+![Right: Péter's mailbox with the shop's reply under his own email](docs/screenshots/mail-2-reply-arrives.png)
+*Right: the reply has arrived in Péter's mailbox, under his original email.*
+
+That is the end of the colleague's work on this message. Instead of searching through the
 order system, the catalog and old cases and typing the answer, the colleague mostly checks
 and approves. *(How much time this saves in practice still has to be measured with real
 tickets.)*
 
-**7. If Péter writes back, the ticket continues.**
+**7. If Péter writes back, PrintDesk picks up the answer by itself.**
+Péter simply replies to the email. PrintDesk notices the answer in the support mailbox,
+recognises that it belongs to the same conversation and reopens the same ticket with the whole
+history. The AI reads the new message together with everything before it:
 - *"It didn't help"*: the ticket reopens with the whole conversation, and the AI suggests
   the next steps without repeating the ones already tried.
 - *"It works now, thank you!"*: the AI recognises it, and the colleague clicks **Close as
   solved**. The step that fixed it is recorded.
 
-![The customer confirms the fix and the ticket can be closed as solved](docs/screenshots/flow-solved.png)
-*Péter writes "Thank you! After cleaning the rollers slot 2 works again." The ticket shows it's
-fixed, and which step did it.*
+![Right: Péter's answer. Left: the same ticket, reopened by itself, showing that the customer confirms the fix](docs/screenshots/mail-3-answer-picked-up.png)
+*Right: Péter answers "Thank you! After cleaning the rollers, slot 2 works again." Left: the
+ticket picked up his answer by itself. It shows that the problem is fixed and which step fixed
+it, with a **Close as solved** button.*
 
 **8. The system learns from the result.**
 Every closed ticket is added to the shop's history. If a step keeps solving the AMS problem,
@@ -182,6 +210,7 @@ solved the problem. These numbers decide the order of the suggestions.*
 | Products, prices and compatibility from 3djake.at | Stock levels |
 | The way the AI reads, checks and drafts | Orders and order numbers |
 | Gmail connection: reading and replying in the claude.ai version | The 480 past cases behind the statistics |
+| The email loop in the video: the same app code that runs with Gmail | The mail server in the video (a local demo mailbox instead of Gmail) |
 | Triage of the demo emails in the screenshots and video (recorded from a real run) | Demo customer emails, the shortened reply and the follow-up in the video |
 
 ---
@@ -237,7 +266,9 @@ The repository has two ways to run the same product:
 2. **Locally with the Java backend.** `backend/` is a zero-dependency Java 21 server. It runs
    the server-side triage agent (the Claude tool-use loop, with the API key kept on the server),
    exposes a REST API and serves the same UI. `frontend/local-runtime.js` maps the UI's runtime
-   calls onto that API. Gmail is not wired up locally; you paste emails or load the demo set.
+   calls onto that API. Instead of Gmail, a built-in **demo mailbox** answers the same mail calls
+   (`search_threads`, `get_thread`, `reply`, `send_message`). Customers write and reply on
+   `/mailbox.html`, so the whole email loop works locally through the same UI code.
 
 Details: [docs/architecture.md](docs/architecture.md)
 
@@ -251,7 +282,8 @@ Requirements: Java 21+, Maven 3.9+ (only for building and tests). There are no r
 cd backend && mvn -q package && cd ..
 export ANTHROPIC_API_KEY=sk-ant-...        # optional; without it the UI runs in knowledge-base mode
 java -jar backend/target/printdesk.jar     # run from the repository root
-# open http://localhost:8080 → Support → "Load demo emails"
+# support team:  http://localhost:8080 → Support
+# customer:      http://localhost:8080/mailbox.html   (write to support@printdesk-demo.example)
 ```
 
 | Env var | Default | Meaning |
@@ -321,7 +353,7 @@ Run it after every prompt change. The labels are the regression suite for the ag
 cd backend && mvn test
 ```
 
-32 JUnit tests cover the JSON codec, priority, pre-filter, injection guard, assignment, the
+35 JUnit tests cover the JSON codec, the demo mailbox, priority, pre-filter, injection guard, assignment, the
 learning loop, part ranking, orders and warranty, and the full agent loop against a scripted
 fake model (tool calls, error handling, output validation), all without network access.
 GitHub Actions runs them on every push.
@@ -353,7 +385,7 @@ docs/       architecture, demo script, screenshots
 
 ## Limitations and next steps
 
-- Running locally, mail ingestion is not wired up (Gmail works in the claude.ai version). In production a scheduled worker would poll the mailbox and run triage with no browser open.
+- Mail is picked up while the page is open: Gmail in the claude.ai version, the demo mailbox locally. In production a scheduled worker would poll the mailbox and run triage with no browser open, and the demo mailbox would be replaced by IMAP/SMTP or the Gmail API.
 - Stock, orders and history are simulated. The next step would be connecting the shop system (Shopware/Shopify API) and the real ticket history.
 - Photo analysis works for uploaded images. Fetching Gmail attachments depends on the connector.
 - The eval set is small (24 emails). It should grow from real, anonymised tickets.

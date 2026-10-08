@@ -6,7 +6,11 @@ AMS feed errors, adhesion. Answers depend on the exact printer model, and part c
 easy to get wrong.
 
 ## 2. Inbox (3 min)
-1. Support → Inbox → **Load demo emails** (6 emails: HU, EN, DE, FR, PL).
+Put two windows side by side: the support app, and the customer's mailbox (Gmail in claude.ai, or
+`/mailbox.html` when running locally).
+1. As the customer, email the support address (the Hungarian AMS email from the demo set). Within
+   a minute it shows up in the inbox by itself. **Load demo emails** adds the other five
+   (HU, EN, DE, FR, PL).
 2. Watch them get triaged. Open the **X1C burning smell** ticket:
    - P1 with reasons (safety +50, urgent, angry…) and the reply deadline
    - Order panel: the warranty **expired** according to the order, whatever the customer says
@@ -15,8 +19,8 @@ easy to get wrong.
 4. Ask the agent to rewrite: "rövidebb" / "shorter". **Approve → Send**.
 
 ## 3. Follow-up and learning (2 min)
-1. Paste the customer's answer "didn't help" → the ticket reopens and the agent proposes the next steps, without repeats.
-2. Paste "it works now" → green banner → **Close as solved**.
+1. In the customer's mailbox the reply has arrived in the same thread. Answer "didn't help": PrintDesk picks the answer up by itself, the ticket reopens and the agent proposes the next steps, without repeats.
+2. Answer "it works now" → picked up by itself → green banner → **Close as solved**.
 3. Insights → *What actually fixes it*: the step's fix rate moved.
 
 ## 4. Safety (1 min)

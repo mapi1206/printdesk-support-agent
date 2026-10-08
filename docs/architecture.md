@@ -5,7 +5,8 @@
 | Component | Where | Responsibility |
 |---|---|---|
 | UI | `frontend/index.html` | Customer chat, support inbox, phone quick mode, parts & offers, knowledge base, insights, settings |
-| Runtime adapter | `frontend/local-runtime.js` | Gives the UI the same `window.claude` surface (`sample`, `db`) on top of the Java API when run locally |
+| Runtime adapter | `frontend/local-runtime.js` | Gives the UI the same `window.claude` surface (`sample`, `db`, `mcp`) on top of the Java API when run locally |
+| Demo mailbox | `backend/.../api/DemoMailbox` + `frontend/mailbox.html` | Local stand-in for Gmail: answers `search_threads`, `get_thread`, `reply`, `send_message`; customers write and reply on `mailbox.html` |
 | Triage agent | `backend/.../agent` | Claude Messages API tool-use loop, prompts, tools, output validation |
 | Domain logic | `backend/.../triage`, `knowledge`, `parts`, `orders`, `team` | Priority, pre-filter, injection guard, learning loop, best offer, warranty, assignment |
 | API | `backend/.../api` | REST endpoints, static files, JSON document store |
@@ -24,8 +25,8 @@ stateDiagram-v2
   error --> new: retry
   ready --> approved: colleague approves (after optional edits / rewrite)
   approved --> ready: edit again
-  approved --> sent: reply sent in the Gmail thread
-  sent --> new: customer writes back (follow-up, full history)
+  approved --> sent: reply sent in the same mail thread (Gmail, or the demo mailbox locally)
+  sent --> new: customer writes back, picked up automatically (follow-up, full history)
   sent --> closed: Close ticket (outcome recorded → learning loop)
   ready --> closed: customer confirms fix / close without reply
   closed --> new: customer writes back

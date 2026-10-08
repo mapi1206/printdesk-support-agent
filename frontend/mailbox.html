@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer Mailbox</title>
+<!--
+  The customer's side of the local demo mailbox. Write to the support address, read the
+  shop's replies and answer them. PrintDesk picks the mail up automatically, exactly as it does
+  with Gmail in claude.ai. Pick the customer with ?addr=…&name=… (defaults to Szabó Péter).
+-->
+<style>
+:root{--bg:#f4f6fb;--panel:#fff;--ink:#1d2433;--muted:#667085;--line:#e3e7ef;--acc:#2f5bd3;--accbg:#e9efff;--ok:#1f7a4d}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11151d;--panel:#1a2030;--ink:#e7ebf3;--muted:#98a2b3;--line:#2a3245;--acc:#7d9cff;--accbg:#22305a;--ok:#5fd39a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:700}
+header h1{font-size:17px;margin:0}
+header .who{margin-left:auto;text-align:right;font-size:13px;color:var(--muted)}
+header .who b{display:block;color:var(--ink);font-size:14px}
+main{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:12px 16px;max-width:1100px;margin:0 auto}
+@media (min-width:900px){main{grid-template-columns:320px minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line);font-weight:600}
+button{font:inherit;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;cursor:pointer}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.thread{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:10px 12px;background:none}
+.thread[aria-current="true"]{background:var(--accbg)}
+.thread .top{display:flex;gap:8px;align-items:baseline}
+.thread .from{font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thread .time{font-size:12px;color:var(--muted)}
+.thread .subj{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thread .snip{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thread.unread .from::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc);margin-right:6px;vertical-align:1px}
+.empty{padding:20px 12px;color:var(--muted);font-size:14px}
+.msg{padding:14px 16px;border-bottom:1px solid var(--line)}
+.msg .head{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px}
+.msg .head b{font-size:15px}
+.msg .head span{font-size:12px;color:var(--muted)}
+.msg .body{white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.shop{background:color-mix(in srgb,var(--accbg) 45%,transparent)}
+.tag{font-size:11px;font-weight:600;color:var(--acc);border:1px solid var(--acc);border-radius:99px;padding:1px 7px}
+.compose{padding:12px 16px;display:grid;gap:8px}
+.compose label{font-size:12px;color:var(--muted);font-weight:600}
+input,textarea{font:inherit;width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);color:var(--ink)}
+textarea{min-height:120px;resize:vertical}
+.row{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.note{font-size:12px;color:var(--muted);padding:8px 16px 12px}
+.sent{color:var(--ok);font-size:13px;font-weight:600}
+h2.subject{font-size:18px;margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" aria-hidden="true">✉</div>
+  <h1>Customer mailbox <span style="font-weight:400;color:var(--muted)">· demo</span></h1>
+  <div class="who"><b id="whoName"></b><span id="whoAddr"></span></div>
+</header>
+<main>
+  <section class="panel" aria-label="Inbox">
+    <div class="bar">Inbox <button id="newmail" class="primary">New email</button></div>
+    <div id="list"></div>
+  </section>
+  <section class="panel" id="view" aria-live="polite"></section>
+</main>
+<script>
+const P=new URLSearchParams(location.search);
+const ME={addr:(P.get("addr")||"szabo.peter@example.com").toLowerCase(),name:P.get("name")||"Szabó Péter"};
+const SUPPORT=P.get("support")||"support@printdesk-demo.example";
+const S={threads:[],open:null,compose:true,seen:new Set(),draft:{to:SUPPORT,subject:"",body:""},reply:"",flash:""};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const addrOf=s=>{const m=String(s||"").match(/<([^>]+)>/);return (m?m[1]:String(s||"")).trim().toLowerCase();};
+const nameOf=s=>{const m=String(s||"").match(/^\s*"?([^"<]*?)"?\s*</);return m&&m[1]?m[1]:addrOf(s);};
+const time=ms=>new Date(+ms).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+$("#whoName").textContent=ME.name; $("#whoAddr").textContent=ME.addr;
+
+async function load(){
+  try{
+    const r=await fetch("/api/mail/box?addr="+encodeURIComponent(ME.addr)); if(!r.ok) return;
+    const {threads}=await r.json(); const k=JSON.stringify(threads.map(t=>[t.id,t.messageCount]));
+    if(k!==load.k){ load.k=k; S.threads=threads; render(); }
+  }catch(_){}
+}
+function unread(t){ return t.messages.some(m=>addrOf(m.sender)!==ME.addr&&!S.seen.has(m.id)); }
+function render(){
+  // keep what the customer is typing
+  const f=document.activeElement, fid=f?.id, pos=f?.selectionStart;
+  if($("#to")) S.draft={to:$("#to").value,subject:$("#subj").value,body:$("#body").value};
+  if($("#replybody")) S.reply=$("#replybody").value;
+  $("#list").innerHTML=S.threads.length?S.threads.map(t=>{const last=t.messages[t.messages.length-1];
+    return `<button class="thread ${unread(t)&&S.open!==t.id?"unread":""}" data-thread="${t.id}" aria-current="${S.open===t.id}">
+      <div class="top"><span class="from">${esc(t.messages.length>1?nameOf(last.sender)+" ("+t.messages.length+")":nameOf(last.sender))}</span><span class="time">${time(t.lastAt)}</span></div>
+      <div class="subj">${esc(t.subject)}</div><div class="snip">${esc(t.snippet)}</div></button>`;}).join(""):`<div class="empty">No emails yet.</div>`;
+  const t=S.threads.find(x=>x.id===S.open);
+  if(t&&!S.compose){
+    t.messages.forEach(m=>S.seen.add(m.id));
+    $("#view").innerHTML=`<h2 class="subject">${esc(t.subject)}</h2>`+t.messages.map(m=>{const shop=addrOf(m.sender)!==ME.addr;
+      return `<article class="msg ${shop?"shop":""}"><div class="head"><b>${esc(nameOf(m.sender))}</b>${shop?`<span class="tag">Shop</span>`:""}<span>${esc(addrOf(m.sender))} → ${esc(m.toRecipients.join(", "))} · ${time(m.internalDate)}</span></div><div class="body">${esc(m.plaintextBody)}</div></article>`;}).join("")+
+      `<div class="compose"><label for="replybody">Reply</label><textarea id="replybody" placeholder="Write your reply…">${esc(S.reply)}</textarea>
+       <div class="row">${S.flash?`<span class="sent">${esc(S.flash)}</span>`:""}<button id="sendreply" class="primary">Send reply</button></div></div>`;
+  } else {
+    $("#view").innerHTML=`<h2 class="subject">New email</h2><div class="compose">
+      <label for="to">To</label><input id="to" value="${esc(S.draft.to)}">
+      <label for="subj">Subject</label><input id="subj" value="${esc(S.draft.subject)}">
+      <label for="body">Message</label><textarea id="body" style="min-height:220px">${esc(S.draft.body)}</textarea>
+      <div class="row">${S.flash?`<span class="sent">${esc(S.flash)}</span>`:""}<button id="sendmail" class="primary">Send</button></div></div>
+      <p class="note">This page is the customer's side of the local demo mailbox. Mail sent here lands in PrintDesk's support inbox.</p>`;
+  }
+  if(fid&&$("#"+fid)){ const el=$("#"+fid); el.focus(); try{ el.setSelectionRange(pos,pos);}catch(_){} }
+}
+async function post(body){
+  const r=await fetch("/api/mail/customer",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({from_name:ME.name,from:ME.addr,...body})});
+  if(!r.ok) throw new Error((await r.json().catch(()=>({}))).error||"send failed"); return r.json();
+}
+document.addEventListener("click",async e=>{
+  const th=e.target.closest("[data-thread]");
+  if(th){ S.open=th.dataset.thread; S.compose=false; S.flash=""; S.reply=""; render(); return; }
+  if(e.target.id==="newmail"){ S.compose=true; S.open=null; S.flash=""; render(); return; }
+  if(e.target.id==="sendmail"){
+    const d={to:$("#to").value.trim(),subject:$("#subj").value.trim(),body:$("#body").value};
+    if(!d.to||!d.body.trim()) return;
+    try{ const m=await post(d); $("#subj").value=""; $("#body").value=""; S.draft={to:SUPPORT,subject:"",body:""}; S.compose=false; S.open=m.threadId; S.flash="Sent ✓"; load.k=null; await load(); render(); }catch(err){ S.flash=err.message; render(); }
+  }
+  if(e.target.id==="sendreply"){
+    const t=S.threads.find(x=>x.id===S.open), body=$("#replybody").value; if(!t||!body.trim()) return;
+    const last=[...t.messages].reverse().find(m=>addrOf(m.sender)!==ME.addr)||t.messages[0];
+    try{ await post({to:addrOf(last.sender)===ME.addr?last.toRecipients[0]:addrOf(last.sender),subject:/^re:/i.test(t.subject)?t.subject:"Re: "+t.subject,body,thread_id:t.id}); $("#replybody").value=""; S.reply=""; S.flash="Sent ✓"; load.k=null; await load(); render(); }catch(err){ S.flash=err.message; render(); }
+  }
+});
+render(); load(); setInterval(load,2000);
+</script>
+</body>
+</html>

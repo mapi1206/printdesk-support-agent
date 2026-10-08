@@ -7,7 +7,9 @@
  * on top of the backend's REST API:
  *   sample(input) / sample.json(input) → POST /api/complete   (API key stays on the server)
  *   db.collection(..).doc(..).set/get/delete/onSnapshot → /api/db/...  (JSON file store)
- * Gmail is not available locally; paste emails or load the demo emails instead.
+ *   mcp (Gmail) → /api/mail/...  a local demo mailbox that answers the same Gmail calls
+ *                 (search_threads, get_thread, reply, send_message). Customers write and read
+ *                 their mail on /mailbox.html, so the whole email loop works without Gmail.
  */
 (function () {
   if (window.claude) return; // running inside claude.ai – use the real runtime
@@ -19,6 +21,13 @@
     return body;
   };
   const health = api("/api/health").catch(() => null);
+  // First local start: point the inbox at the demo mailbox's support address.
+  health.then(async h => {
+    if (!h) return;
+    const cur = await api("/api/db/settings/mailboxes").catch(() => null);
+    if (cur && !cur.exists) await api("/api/db/settings/mailboxes", { method: "PUT", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ list: [{ addr: "support@printdesk-demo.example", kind: "general", owner: "General support" }], updated: Date.now() }) }).catch(() => {});
+  });
 
   // ---------------------------------------------------------------- sample (Claude via backend)
   async function sample(input, opts = {}) {
@@ -89,13 +98,43 @@
     doc(path) { const i = path.lastIndexOf("/"); return docRef(path.slice(0, i), path.slice(i + 1)); },
   };
 
+  // ---------------------------------------------------------------- mcp (local demo mailbox instead of Gmail)
+  const MAIL_POLL_MS = 5000; // local and cheap, so check more often than Gmail's 60 s
+  async function gmailCall(tool, args = {}) {
+    const post = (p, b) => api(p, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) });
+    try {
+      switch (tool) {
+        case "search_threads": return { payload: await api("/api/mail/threads?q=" + enc(args.query || "")) };
+        case "get_thread": return { payload: await api("/api/mail/threads/" + enc(args.threadId)) };
+        case "reply": return { payload: await post("/api/mail/reply", { messageId: args.messageId, body: args.body, to: args.to || [] }) };
+        case "send_message": return { payload: await post("/api/mail/send", { to: args.to || [], subject: args.subject, body: args.body }) };
+        default: throw { code: "not_in_manifest", message: tool };
+      }
+    } catch (e) {
+      throw e?.code === "not_in_manifest" ? e : { code: "tool_error", message: e?.message || "mail error" };
+    }
+  }
+  const mcp = {
+    async listTools() { return { servers: [{ server: "Gmail", authStatus: "ok", tools: ["search_threads", "get_thread", "reply", "send_message"] }] }; },
+    async callTool(server, tool, args) { return gmailCall(tool, args); },
+    watchTool(server, tool, args, onEvent, opts = {}) {
+      let stopped = false;
+      const tick = () => gmailCall(tool, args).then(r => !stopped && onEvent({ type: "result", result: r })).catch(e => !stopped && onEvent({ type: "error", error: e }));
+      tick();
+      const h = setInterval(tick, Math.min(opts.refetchInterval || MAIL_POLL_MS, MAIL_POLL_MS));
+      return () => { stopped = true; clearInterval(h); };
+    },
+  };
+
   window.claude = {
+    localMailLabel: "Demo mailbox",
     use: async (name) => {
       const h = await health;
       if (!h) return null;
       if (name === "sample") return h.llm ? sample : null;
       if (name === "db") return db;
-      return null; // mcp (Gmail), user, … are claude.ai-only
+      if (name === "mcp") return mcp;
+      return null; // user, … are claude.ai-only
     },
   };
 })();

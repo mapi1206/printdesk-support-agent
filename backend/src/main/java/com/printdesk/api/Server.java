@@ -59,6 +59,7 @@ public final class Server {
     private final Path staticRoot;
     private final Path dataFile;
     private final Clock clock;
+    private final DemoMailbox mail;
 
     public Server(Catalog catalog, Learning learning, PartRanker ranker, TriageAgent agent, LlmClient llm,
                   LocalStore store, Path staticRoot, Path dataFile, Clock clock) {
@@ -71,6 +72,7 @@ public final class Server {
         this.staticRoot = staticRoot.toAbsolutePath().normalize();
         this.dataFile = dataFile;
         this.clock = clock;
+        this.mail = new DemoMailbox(clock);
     }
 
     public HttpServer start(int port) throws IOException {
@@ -99,6 +101,8 @@ public final class Server {
                 triage(ex);
             } else if (path.equals("/api/complete") && method.equals("POST")) {
                 complete(ex);
+            } else if (path.startsWith("/api/mail")) {
+                mail(ex, path, method, q);
             } else if (path.startsWith("/api/db/")) {
                 db(ex, path.substring("/api/db/".length()), method);
             } else {
@@ -209,6 +213,45 @@ public final class Server {
                 default -> json(ex, 405, Map.of("error", "method not allowed"));
             }
         } else json(ex, 400, Map.of("error", "use /api/db/{collection} or /api/db/{collection}/{id}"));
+    }
+
+    /**
+     * Local demo mailbox (stands in for Gmail):
+     * GET  /api/mail/threads?q=to:addr      → {threads:[{id, messageCount, …}]}   (search_threads)
+     * GET  /api/mail/threads/{id}           → {messages:[…]}                      (get_thread)
+     * POST /api/mail/reply {messageId, body, to}                                  (reply)
+     * POST /api/mail/send {to:[…], subject, body, from}                           (send_message)
+     * POST /api/mail/customer {from_name, from, to, subject, body, thread_id?}    (a customer writes)
+     * GET  /api/mail/box?addr=…             → the customer's own threads
+     * DELETE /api/mail                      → empty the mailbox
+     */
+    @SuppressWarnings("unchecked")
+    private void mail(HttpExchange ex, String path, String method, Map<String, String> q) throws IOException {
+        String rest = path.equals("/api/mail") ? "" : path.substring("/api/mail/".length());
+        switch (method + " " + (rest.startsWith("threads/") ? "threads/*" : rest)) {
+            case "GET threads" -> json(ex, 200, Map.of("threads", mail.searchThreads(q.get("q"))));
+            case "GET threads/*" -> json(ex, 200, Map.of("messages", mail.getThread(rest.substring("threads/".length()))));
+            case "GET box" -> json(ex, 200, Map.of("threads", mail.mailboxOf(require(q, "addr"))));
+            case "POST reply" -> {
+                Map<String, Object> in = Json.parseObject(body(ex));
+                json(ex, 200, mail.reply(str(in, "messageId"), str(in, "body"), (List<String>) (List<?>) list(in, "to")));
+            }
+            case "POST send" -> {
+                Map<String, Object> in = Json.parseObject(body(ex));
+                json(ex, 200, mail.send((List<String>) (List<?>) list(in, "to"), str(in, "subject"), str(in, "body"),
+                        str(in, "from", "support@printdesk-demo.example")));
+            }
+            case "POST customer" -> {
+                Map<String, Object> in = Json.parseObject(body(ex));
+                json(ex, 200, mail.customerSend(str(in, "from_name"), str(in, "from"), str(in, "to"), str(in, "subject"),
+                        str(in, "body"), str(in, "thread_id")));
+            }
+            case "DELETE " -> {
+                mail.clear();
+                json(ex, 200, Map.of("ok", true));
+            }
+            default -> json(ex, 404, Map.of("error", "not found"));
+        }
     }
 
     // ------------------------------------------------------------------ static files

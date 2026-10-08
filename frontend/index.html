@@ -537,9 +537,12 @@ function render(){
   // keep the viewer's place: focused field, caret and chat draft survive live updates
   const ae=document.activeElement, fid=ae&&ae.id, sel=fid&&ae.setSelectionRange?[ae.selectionStart,ae.selectionEnd]:null;
   const ci=$("#chatin"); if(ci) S.draft=ci.value;
+  // what the viewer is typing in the focused field (rewrite instruction, note, reply…) survives a live re-render
+  const typed=ae&&fid&&ae.closest?.("#app")&&/^(INPUT|TEXTAREA)$/.test(ae.tagName)&&!["checkbox","radio","file"].includes(ae.type)&&ae.value!==ae.defaultValue?[[fid,ae.value,ae.defaultValue]]:[];
   renderShell();
   const v=S.view, app=$("#app");
-  render._after=()=>{ const c=$("#chatin"); if(c&&S.draft) c.value=S.draft; if(fid){const el=document.getElementById(fid); if(el&&el!==document.activeElement){el.focus(); if(sel&&el.setSelectionRange) try{el.setSelectionRange(sel[0],sel[1]);}catch(_){}}} };
+  render._after=()=>{ const c=$("#chatin"); if(c&&S.draft) c.value=S.draft;
+    for(const [id,v,dv] of typed){ const el=document.getElementById(id); if(el&&el.defaultValue===dv&&el.value===el.defaultValue) el.value=v; } if(fid){const el=document.getElementById(fid); if(el&&el!==document.activeElement){el.focus(); if(sel&&el.setSelectionRange) try{el.setSelectionRange(sel[0],sel[1]);}catch(_){}}} };
   const note = !sample ? `<div class="notice">${esc(t("unavailable"))}</div>`:"";
   if(v==="customer") app.innerHTML=note+viewCustomer();
   else if(v==="support") app.innerHTML=note+viewSupport();
@@ -698,6 +701,7 @@ const OPEN_ST=["new","triaging","ready","approved","error"];
 const SLA_H={P1:2,P2:8,P3:24,P4:48};
 // Mail transport: the viewer's Gmail connector (read inbox, reply in thread, send). Without it replies are recorded, not emailed.
 const GMAIL="Gmail";
+const MAIL_LABEL=window.claude?.localMailLabel||"Gmail"; // the local runtime uses a demo mailbox instead of Gmail
 let mcp=null;
 const MAIL={name:null, canRead:false, canSend:false, state:"off", err:null, lastCheck:null, checking:false, seen:new Map(), unwatch:null};
 // Support mailboxes: several addresses that land in the connected Gmail account (aliases, plus-addresses, forwarded addresses).
@@ -850,7 +854,7 @@ function supInbox(){
   vis.sort((a,b)=>f==="open"?rank(b)-rank(a):(b.last_in||b.received)-(a.last_in||a.received));
   const count=k=>tickets.filter(x=>k==="all"||(k==="open"?OPEN_ST.includes(x.status):k==="sent"?x.status==="sent":k==="filtered"?x.status==="filtered":x.status==="closed")).length;
   const addr=MAILBOXES.length;
-  const gm=MAIL.state==="ok"?`<span class="pill good">✓ Gmail</span>`:`<span class="pill warn">${t("demoMode")}</span>`;
+  const gm=MAIL.state==="ok"?`<span class="pill good">✓ ${MAIL_LABEL}</span>`:`<span class="pill warn">${t("demoMode")}</span>`;
   const tools=`<div class="panel"><div class="row-actions" style="justify-content:space-between"><p class="label" style="margin:0">${t("inbox")}</p>${gm}</div>
     ${mailboxPanel()}${MAIL.state==="ok"?"":
       `<p class="muted" style="font-size:12px;margin:8px 0 0">${MAIL.state==="missing"||MAIL.state==="off"?t("demoNote"):esc(MAIL.err||t("demoNote"))}</p>`}
@@ -948,7 +952,7 @@ function ticketDetail(tk){
       <div class="row-actions" style="margin-top:10px;flex-wrap:nowrap"><label for="rwinst" hidden>${t("rewritePh")}</label><input id="rwinst" class="inp" placeholder="${esc(t("rewritePh"))}" style="flex:1;min-width:0">${S.rewriting===tk.id?`<span class="thinking">${t("rewriting")}</span>`:`<button class="btn quiet small" data-act="rewrite">${t("rewrite")}</button>`}</div>
       ${tk.from_email?"":`<div class="field" style="margin-top:10px"><label for="setmail">${t("noReplyAddr")}</label><div class="row-actions" style="flex-wrap:nowrap"><input id="setmail" class="inp" type="email" placeholder="name@example.com" style="flex:1;min-width:0"><button class="btn quiet small" data-act="setmail">${t("save")}</button></div></div>`}`;
   } else if(tk.status==="approved"){
-    actions=`<div class="sendbar"><div><b>${t("approvedReady")}</b><div class="muted" style="font-size:13px;overflow-wrap:anywhere">${t("sendTo")} ${esc(tk.from_email)}${realSend(tk)?" · Gmail":" · "+t("simNote")}</div></div>
+    actions=`<div class="sendbar"><div><b>${t("approvedReady")}</b><div class="muted" style="font-size:13px;overflow-wrap:anywhere">${t("sendTo")} ${esc(tk.from_email)}${realSend(tk)?" · "+MAIL_LABEL:" · "+t("simNote")}</div></div>
       <div class="row-actions">${S.sending===tk.id?`<span class="thinking">${t("sending")}</span>`:`<button class="btn" data-act="send">➤ ${t(realSend(tk)?"sendNow":"sendSim")}</button><button class="btn quiet small" data-act="unapprove">${t("editAgain")}</button>`}</div></div>${S.sendErr?.id===tk.id?`<div class="notice">${esc(S.sendErr.msg)}</div>`:""}`;
   }
   const draft=`<div class="panel"><div class="row-actions" style="justify-content:space-between"><p class="label" style="margin:0">${t("draft")} · ${esc(LANG_NAMES[a.lang]||a.lang)}</p>${tk.edited_by_support?`<span class="pill">${t("edited")}</span>`:""}</div>
