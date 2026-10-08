@@ -804,7 +804,8 @@ function viewSupport(){
   const n=needsAction();
   const tabs=`<div class="subtabs" role="tablist">${[["inbox",t("inbox")+(n?` (${n})`:"")],["phone",t("phone")]].map(([k,l])=>`<button role="tab" aria-selected="${S.sup.tab===k}" data-sup="${k}">${l}</button>`).join("")}</div>`;
   if(S.sup.tab!=="phone"){ S.inboxSeen=true; queueMicrotask(autoTriage); }
-  const vis=VISITOR?`<div class="notice okn" style="margin:0 0 14px"><b>${t("visTitle")}.</b> ${t("visText")}</div>`:"";
+  const vis=VISITOR?`<div class="notice okn" style="margin:0 0 14px"><b>${t("visTitle")}.</b> ${t("visText")}${S.previewing?`<div class="row-actions" style="margin-top:8px"><span class="muted" style="font-size:13px">${t("previewNote")}</span><button class="btn small" data-preview="off">${t("previewOff")}</button></div>`:""}</div>`
+    :CAN_FULL?`<div class="row-actions" style="justify-content:flex-end;margin:0 0 10px"><span class="muted" style="font-size:12px">${t("previewHint")}</span><button class="btn quiet small" data-preview="on">👁 ${t("previewOn")}</button></div>`:"";
   return `<div style="margin-top:18px">${vis}${tabs}${S.sup.tab==="phone"?supPhone():supInbox()}</div>`;
 }
 
@@ -1712,6 +1713,42 @@ async function viewerCanUseSharedDesk(){
 Object.assign(T.en,{visTitle:"Demo view",visText:"You're looking at the PrintDesk agent in a private demo copy. Load the demo emails and watch the agent read, prioritise and answer them. Nothing you do here is saved or emailed, and the shop's real tickets aren't shown."});
 Object.assign(T.de,{visTitle:"Demo-Ansicht",visText:"Sie sehen den PrintDesk-Agenten in einer privaten Demo-Kopie. Laden Sie die Demo-E-Mails und sehen Sie zu, wie der Agent sie liest, priorisiert und beantwortet. Hier wird nichts gespeichert oder gemailt, und die echten Tickets des Shops werden nicht angezeigt."});
 
+const DB_SUBS=[];
+let CAN_FULL=false;   // owner/editor of the shared desk in claude.ai (offered "view as visitor")
+function attachDb(d){
+  const sub=u=>DB_SUBS.push(u);
+  sub(d.doc("settings/mailboxes").onSnapshot(snap=>{
+    const list=snap.exists&&Array.isArray(snap.data().list)?snap.data().list.filter(m=>m&&m.addr):[];
+    if(!snap.exists&&!snap.metadata.fromCache&&!VISITOR){ let old=""; try{old=(localStorage.getItem("pd-support-addr")||"").trim();}catch(_){} if(old){ saveMailboxes([{addr:old.toLowerCase(),kind:"general",owner:"",boost:0}]); return; } }
+    MAILBOXES=list.map(m=>({...m})); MAIL.seen.clear(); startMailWatch(); render();
+  }, err=>console.warn("db settings",err)));
+  const setDoc=(name,fn)=>sub(d.doc("settings/"+name).onSnapshot(sn=>{ if(sn.exists) fn(sn.data()); render(); maybeAutoSummary(); },err=>console.warn("db "+name,err)));
+  setDoc("team",x=>{TEAM={members:Array.isArray(x.members)?x.members:[],min_daily:Number.isFinite(x.min_daily)?x.min_daily:5,auto:x.auto!==false};});
+  setDoc("style",x=>{STYLE={tone:x.tone||"friendly",signature:x.signature||"",include:x.include||"",avoid:x.avoid||""};});
+  setDoc("privacy",x=>{PRIV={retention_days:Number.isFinite(x.retention_days)?x.retention_days:90,auto:x.auto!==false,last_run:x.last_run||null};});
+  setDoc("alerts",x=>{ALERTCFG={on:!!x.on,levels:Array.isArray(x.levels)&&x.levels.length?x.levels:["P1"]};});
+  setDoc("summary",x=>{SUMCFG={to:x.to||"",hour:Number.isFinite(x.hour)?x.hour:8,auto:!!x.auto,last:x.last||null};});
+  sub(d.collection("evals").onSnapshot(snap=>{ EVALS=snap.docs.map(x=>({...x.data()})); render(); },err=>console.warn("db evals",err)));
+  sub(d.collection("kb").onSnapshot(snap=>{ KB=snap.docs.map(x=>({...x.data()})); applyKB(); render(); },err=>console.warn("db kb",err)));
+  sub(d.collection("tickets").onSnapshot(snap=>{ tickets=snap.docs.map(x=>({...x.data()})); S.ticketsLoaded=true; render(); autoTriage(); maybeAutoSummary(); runRetention(false); checkOverdue(); }, err=>{ console.warn("db tickets",err); }));
+  sub(d.collection("cases").onSnapshot(snap=>{ live=snap.docs.map(x=>{const nd=x.data();const old=live.find(o=>o.id===nd.id);return old&&old._dirty?old:{...nd};}); render(); }, err=>{ console.warn("db",err); }));
+}
+// The owner can switch to exactly what a visitor sees: the shared desk is detached for this page
+// view (nothing is changed or deleted) and an empty sandbox takes its place. "Back" reloads.
+function previewAsVisitor(){
+  while(DB_SUBS.length){ try{ DB_SUBS.pop()(); }catch(_){} }
+  MAIL.unwatch?.(); MAIL.unwatch=null; mcp=null; Object.assign(MAIL,{state:"off",canRead:false,canSend:false,err:null}); MAIL.seen.clear();
+  tickets=[]; live=[]; KB=[]; EVALS=[]; MAILBOXES=[]; applyKB();
+  TEAM={members:[],min_daily:5,auto:true}; STYLE={tone:"friendly",signature:"",include:"",avoid:""}; SUMCFG={to:"",hour:8,auto:false,last:null};
+  PRIV={retention_days:90,auto:true,last_run:null}; ALERTCFG={on:false,levels:["P1"]};
+  Object.assign(S.sup,{ticket:null,filter:"open"}); S.triedIds.clear(); S.edits={}; S.trans={};
+  VISITOR=true; S.previewing=true; S.view="support"; db=sandboxDb(); attachDb(db); render(); window.scrollTo(0,0);
+}
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-preview]"); if(!b) return;
+  if(b.dataset.preview==="on") previewAsVisitor(); else location.reload(); });
+Object.assign(T.en,{previewOn:"View as visitor",previewHint:"See exactly what people with the shared link see. Your data stays untouched.",previewOff:"Back to my desk",previewNote:"You are previewing the visitor view."});
+Object.assign(T.de,{previewOn:"Als Besucher ansehen",previewHint:"Genau das sehen, was Personen mit dem geteilten Link sehen. Ihre Daten bleiben unverändert.",previewOff:"Zurück zu meinem Desk",previewNote:"Sie sehen gerade die Besucheransicht."});
+
 /* ============================================================ safety & hygiene: injection guard, non-support filter, privacy, cleanup, overdue alerts */
 Object.assign(T.en,{stFiltered:"Not support",f_filtered:"Filtered",filteredWhy:"Set aside as not a support request: {r}",notSpam:"This is support – process it",
   injTitle:"Possible manipulation attempt",injText:"This email contains text that tries to instruct the agent ({r}). The agent treated it as data – check the reply carefully before approving.",
@@ -2114,24 +2151,10 @@ document.addEventListener("change",e=>{
   const fullDesk=viewerCanUseSharedDesk();
   fullDesk.then(full=>{ if(full) claude.use("mcp").then(m=>initMail(m)).catch(()=>{}); });
   Promise.all([claude.use("db"),fullDesk]).then(([shared,full])=>{
+    CAN_FULL=!!(full&&shared&&!window.claude?.localMailLabel);
     const d=full?shared:(shared?sandboxDb():null);
     if(!full&&d){ VISITOR=true; let v=null; try{v=localStorage.getItem("pd-view");}catch(_){} if(!v) S.view="support"; render(); }
-    db=d; if(!d) return;
-    d.doc("settings/mailboxes").onSnapshot(snap=>{
-      const list=snap.exists&&Array.isArray(snap.data().list)?snap.data().list.filter(m=>m&&m.addr):[];
-      if(!snap.exists&&!snap.metadata.fromCache){ let old=""; try{old=(localStorage.getItem("pd-support-addr")||"").trim();}catch(_){} if(old){ saveMailboxes([{addr:old.toLowerCase(),kind:"general",owner:"",boost:0}]); return; } }
-      MAILBOXES=list.map(m=>({...m})); MAIL.seen.clear(); startMailWatch(); render();
-    }, err=>console.warn("db settings",err));
-    const setDoc=(name,fn)=>d.doc("settings/"+name).onSnapshot(sn=>{ if(sn.exists) fn(sn.data()); render(); maybeAutoSummary(); },err=>console.warn("db "+name,err));
-    setDoc("team",x=>{TEAM={members:Array.isArray(x.members)?x.members:[],min_daily:Number.isFinite(x.min_daily)?x.min_daily:5,auto:x.auto!==false};});
-    setDoc("style",x=>{STYLE={tone:x.tone||"friendly",signature:x.signature||"",include:x.include||"",avoid:x.avoid||""};});
-    setDoc("privacy",x=>{PRIV={retention_days:Number.isFinite(x.retention_days)?x.retention_days:90,auto:x.auto!==false,last_run:x.last_run||null};});
-    setDoc("alerts",x=>{ALERTCFG={on:!!x.on,levels:Array.isArray(x.levels)&&x.levels.length?x.levels:["P1"]};});
-    setDoc("summary",x=>{SUMCFG={to:x.to||"",hour:Number.isFinite(x.hour)?x.hour:8,auto:!!x.auto,last:x.last||null};});
-    d.collection("evals").onSnapshot(snap=>{ EVALS=snap.docs.map(x=>({...x.data()})); render(); },err=>console.warn("db evals",err));
-    d.collection("kb").onSnapshot(snap=>{ KB=snap.docs.map(x=>({...x.data()})); applyKB(); render(); },err=>console.warn("db kb",err));
-    d.collection("tickets").onSnapshot(snap=>{ tickets=snap.docs.map(x=>({...x.data()})); S.ticketsLoaded=true; render(); autoTriage(); maybeAutoSummary(); runRetention(false); checkOverdue(); }, err=>{ console.warn("db tickets",err); });
-    d.collection("cases").onSnapshot(snap=>{ live=snap.docs.map(x=>{const nd=x.data();const old=live.find(o=>o.id===nd.id);return old&&old._dirty?old:{...nd};}); render(); }, err=>{ console.warn("db",err); });
+    db=d; if(d) attachDb(d);
   });
 })();
 </script>
