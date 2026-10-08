@@ -29,7 +29,13 @@ the customer.
 > Stock levels, orders and the 480-case history are **simulated** so the statistics have
 > something to work with.
 
-![Support inbox: prioritised tickets, order check, ranked steps with fix rates, best-offer part](docs/screenshots/inbox.png)
+### Demo video
+
+![PrintDesk demo: emails arrive, the AI triages them, a colleague approves the reply, the customer confirms the fix, and the statistics update](docs/media/printdesk-demo.gif)
+
+*90 seconds, with captions. [Full-quality video (MP4)](docs/media/printdesk-demo.mp4).
+The triage of the six demo emails comes from a real run and is replayed, so the video always
+shows the same result. The shortened reply and the answer to the follow-up are scripted.*
 
 ---
 
@@ -39,12 +45,17 @@ the customer.
 
 ### An example from start to finish
 
-Anna bought a Bambu Lab P1S printer. She writes to the shop's support address in Hungarian:
-*"The AMS keeps stopping, the filament doesn't arrive. I have a big order to print by Friday."*
+Péter bought a Bambu Lab P1S printer. He writes to the shop's support address in Hungarian.
+In short: *"Slot 2 of my AMS doesn't feed the filament any more and the printer shows 'AMS feed
+failed'. I already cut the filament tip and reloaded it, but it didn't help. I have an order
+to deliver next week, so this is urgent."*
+
+(The AMS is the box on top of the printer that holds several filament spools and feeds them
+in automatically.) The same example runs in the demo video above.
 
 **1. The email arrives and becomes a ticket.**
 PrintDesk checks the support mailbox every minute. Each new email becomes a *ticket*: a case
-card that collects everything about Anna's problem. Mail that isn't a support request, such as
+card that collects everything about Péter's problem. Mail that isn't a support request, such as
 newsletters, automatic "I'm on holiday" replies and bounced emails, is set aside automatically,
 so nobody wastes time on it.
 
@@ -52,22 +63,27 @@ so nobody wastes time on it.
 The AI reads the email the way an experienced colleague would and notes:
 - the language (Hungarian), so the reply will be in Hungarian;
 - the printer (P1S) and the problem (filament feed in the AMS, the automatic filament changer);
-- the mood and urgency: worried, has a deadline on Friday, the printer is effectively down.
+- what he has already tried (cutting the tip and reloading), so that isn't suggested again;
+- the mood and urgency: frustrated, has a deadline next week.
 
 It understands many languages, including German, English, French, Polish and Italian.
 
 **3. The AI checks the facts in the shop's own records.**
 The AI does not answer from memory. It looks things up the way a colleague would open the
 shop's systems:
-- **The order:** is the order number real, which printer did Anna actually buy, is it still
-  under warranty? If Anna says "it's under warranty" but the order shows otherwise, the order
-  wins and the colleague is warned.
+- **The order:** is the order number real, which printer did Péter actually buy, is it still
+  under warranty? If a customer says "it's under warranty" but the order shows otherwise, the
+  order wins and the colleague is warned.
 - **The fixes that worked before:** the shop keeps a record of past cases. For each
   troubleshooting step it knows how often that step actually solved the problem. Free checks
   (cleaning, settings) come first, and buying a part comes last.
-- **The right spare part, if one is needed:** it only suggests parts that fit Anna's printer,
+- **The right spare part, if one is needed:** it only suggests parts that fit Péter's printer,
   and picks the best offer by price, shipping, delivery time and stock. When an alternative
   part is a better deal than the original, both are shown.
+
+![Suggested solution: steps with how often each one fixed the problem, and the recommended part](docs/screenshots/flow-steps.png)
+*The suggested steps, each with how often it fixed this problem in past cases, and the best
+offer for the part if the steps don't help.*
 
 **4. The ticket gets a priority, a summary and an owner.**
 - **Priority (P1 to P4)** is calculated by fixed rules, not by AI guesswork, and every point
@@ -81,8 +97,16 @@ shop's systems:
   the customer's language. Mail sent to someone's personal support address always goes to
   that person.
 
+![A ticket with priority P2 and its reasons, the summary and the facts the AI found](docs/screenshots/flow-overview.png)
+*Péter's ticket: priority P2 with its reasons (urgent, frustrated, deadline, in warranty), the
+summary for the colleague, and the order with the warranty date.*
+
+![A P1 ticket: burning smell, flagged as a safety risk](docs/screenshots/flow-priority.png)
+*A different email from the demo: a burning smell is a safety risk, so it gets P1 (reply
+within 2 hours) and a warning. The customer is told to keep the printer unplugged.*
+
 **5. The AI writes a reply draft.**
-The draft is written in Anna's language and the shop's tone. It includes the steps to try in
+The draft is written in Péter's language and the shop's tone. It includes the steps to try in
 the best order, and a direct order link if a part is needed.
 
 **6. A colleague checks it and sends it.**
@@ -94,19 +118,33 @@ draft. They can:
 - ask the AI in plain words to change it, for example "make it shorter" or "offer the
   cheaper part too".
 
-The reply goes back to Anna in the same email thread. What used to take 10 to 15 minutes of
-searching and typing now takes about a minute of checking.
+![The reply draft in Hungarian with the Approve button and the rewrite box](docs/screenshots/flow-draft.png)
+*The draft in Hungarian after the colleague asked for "Legyen rövidebb" (make it shorter). One
+click on **Approve**, then **Send**.*
 
-**7. If Anna writes back, the ticket continues.**
+The reply goes back to Péter in the same email thread. Instead of searching through the
+order system, the catalog and old cases and typing the answer, the colleague mostly checks
+and approves. *(How much time this saves in practice still has to be measured with real
+tickets.)*
+
+**7. If Péter writes back, the ticket continues.**
 - *"It didn't help"*: the ticket reopens with the whole conversation, and the AI suggests
   the next steps without repeating the ones already tried.
-- *"It works now, thank you!"*: the colleague clicks **Close ticket** and records which step
-  solved it.
+- *"It works now, thank you!"*: the AI recognises it, and the colleague clicks **Close as
+  solved**. The step that fixed it is recorded.
+
+![The customer confirms the fix and the ticket can be closed as solved](docs/screenshots/flow-solved.png)
+*Péter writes "Thank you! After cleaning the rollers slot 2 works again." The ticket shows it's
+fixed, and which step did it.*
 
 **8. The system learns from the result.**
 Every closed ticket is added to the shop's history. If a step keeps solving the AMS problem,
 it moves up the list for the next customer. If it rarely helps, it moves down. The system
 learns from what actually worked, not from what someone guessed.
+
+![What actually fixes it: for each step, how often it was tried and how often it solved the problem](docs/screenshots/flow-learning.png)
+*"What actually fixes it" for the AMS problem: how often each step was tried and how often it
+solved the problem. These numbers decide the order of the suggestions.*
 
 ### Other things it helps with
 
@@ -121,6 +159,9 @@ learns from what actually worked, not from what someone guessed.
   problems are most common, and how often the AI's draft was good enough to send unchanged.
   It also warns about a sudden increase in one problem, which could mean a faulty batch, and
   about parts that are running out of stock.
+
+  ![Insights: cases, resolution rate, ratings, cases per month, top problems](docs/screenshots/flow-insights.png)
+
 - **Daily summary and alerts:** the manager gets a daily summary by email, and colleagues are
   warned when a ticket is about to miss its reply deadline.
 
@@ -141,6 +182,7 @@ learns from what actually worked, not from what someone guessed.
 | Products, prices and compatibility from 3djake.at | Stock levels |
 | The way the AI reads, checks and drafts | Orders and order numbers |
 | Gmail connection: reading and replying in the claude.ai version | The 480 past cases behind the statistics |
+| Triage of the demo emails in the screenshots and video (recorded from a real run) | Demo customer emails, the shortened reply and the follow-up in the video |
 
 ---
 
