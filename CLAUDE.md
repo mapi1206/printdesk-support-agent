@@ -31,7 +31,7 @@ The two prompts (Java backend and in-page app) must stay in sync. Change both.
 ## Before you finish a change
 
 ```bash
-cd backend && mvn -q verify            # 35 tests, no network needed
+cd backend && mvn -q verify            # 41 tests, no network needed
 cd ../data && python generate.py       # if you touched catalog.py; commit the regenerated files
 ```
 

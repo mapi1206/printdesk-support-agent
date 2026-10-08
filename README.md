@@ -261,6 +261,7 @@ for the support team, without lower answer quality.
 |---|---|
 | Support colleagues (German) | [Leitfaden für den Support](docs/de/leitfaden-support.md): daily workflow, warning signs, how to improve the system |
 | IT | [Integration brief](docs/integration.md): what is simulated, what replaces it, rough effort, questions |
+| IT / support lead | [Running inside Freshdesk](docs/freshdesk.md): webhook setup, what is written into tickets, security |
 | Legal | [Privacy brief](docs/privacy.md): personal data, recipients, retention, transparency, open points |
 | Developers and coding agents | [CLAUDE.md](CLAUDE.md): ground rules, where the agent's context lives, checks before a change |
 | Demo | [Demo script](docs/demo-script.md) · [Architecture](docs/architecture.md) |
@@ -283,6 +284,7 @@ for the support team, without lower answer quality.
 | **Knowledge base** | Search across problems and steps. Anyone can propose a step or a new problem; a lead approves it, and the agent uses it right away. |
 | **Insights** | Resolution rate, first-contact fixes, escalations, ratings, share of AI drafts sent unedited, time to reply, top problems, weekly spike alerts (possible batch issues) and stock alerts. |
 | **Safety & privacy** | Prompt-injection guard (prompt rule, pattern scan and a foreign-link check), plus GDPR retention: closed tickets are anonymised after N days and can be deleted. |
+| **Runs inside Freshdesk** | Optionally the agent works directly in Freshdesk: a webhook on every new ticket and customer reply, then priority, tags and a private note with the reply draft are written back into the ticket. The team stays in Freshdesk and a person still sends every reply. See [docs/freshdesk.md](docs/freshdesk.md). |
 
 More screenshots: [part detail](docs/screenshots/part-detail.png) · [insights](docs/screenshots/insights.png) · [knowledge base](docs/screenshots/knowledge.png)
 
@@ -346,6 +348,8 @@ java -jar backend/target/printdesk.jar     # run from the repository root
 | `PRINTDESK_DATA` | `data/data.json` | Catalog, knowledge base, history, orders |
 | `PRINTDESK_DB` | `data/local-db.json` | Local ticket store |
 | `ANTHROPIC_BASE_URL` | `https://api.anthropic.com` | Point to a gateway or a mock |
+| `FRESHDESK_DOMAIN`, `FRESHDESK_API_KEY`, `FRESHDESK_WEBHOOK_TOKEN` | – | Run the agent inside Freshdesk ([docs/freshdesk.md](docs/freshdesk.md)) |
+| `PRINTDESK_BIND` | `127.0.0.1` | Listen address, e.g. `0.0.0.0` behind a reverse proxy |
 
 ### REST API
 
@@ -430,7 +434,7 @@ agent gets a new kind of email wrong, the email is added here with its labels be
 cd backend && mvn test
 ```
 
-35 JUnit tests cover the JSON codec, the demo mailbox, priority, pre-filter, injection guard, assignment, the
+41 JUnit tests cover the JSON codec, the demo mailbox, the Freshdesk connector, priority, pre-filter, injection guard, assignment, the
 learning loop, part ranking, orders and warranty, and the full agent loop against a scripted
 fake model (tool calls, error handling, output validation), all without network access.
 GitHub Actions runs them on every push.
@@ -448,6 +452,7 @@ backend/    Java 21, no runtime dependencies
   knowledge/  learning loop (fix rates, step ranking)
   parts/      best-offer ranking        orders/  order lookup, warranty
   team/       assignment                api/     HTTP server, local document store, demo mailbox
+  freshdesk/  webhook connector: runs the agent inside Freshdesk tickets
   eval/       eval runner
 data/       generate.py → data.json + tables/*.csv + printdesk_data.xlsx (3DJake snapshot, simulated history)
 evals/      labelled test emails

@@ -50,7 +50,8 @@ starts in the morning.
 If support already works in a helpdesk tool (Zendesk, Freshdesk, …), the better option is
 often to **run PrintDesk inside it**: the agent writes the triage and draft as an internal note
 or a suggested reply via the tool's API, and the team keeps the tool they know. In that case
-the mail work package is replaced by a helpdesk integration of similar size.
+the mail work package is replaced by a helpdesk integration of similar size. **For Freshdesk this
+is already built:** see [freshdesk.md](freshdesk.md).
 
 ## Questions for IT
 

@@ -4,6 +4,7 @@ import com.printdesk.agent.LlmClient;
 import com.printdesk.agent.Models;
 import com.printdesk.agent.TriageAgent;
 import com.printdesk.catalog.Catalog;
+import com.printdesk.freshdesk.FreshdeskConnector;
 import com.printdesk.json.Json;
 import com.printdesk.json.Records;
 import com.printdesk.knowledge.Learning;
@@ -21,6 +22,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -60,6 +62,9 @@ public final class Server {
     private final Path dataFile;
     private final Clock clock;
     private final DemoMailbox mail;
+    private FreshdeskConnector freshdesk;   // null unless FRESHDESK_* is configured
+    private byte[] freshdeskToken;
+    private String bindAddress = "127.0.0.1";
 
     public Server(Catalog catalog, Learning learning, PartRanker ranker, TriageAgent agent, LlmClient llm,
                   LocalStore store, Path staticRoot, Path dataFile, Clock clock) {
@@ -75,8 +80,22 @@ public final class Server {
         this.mail = new DemoMailbox(clock);
     }
 
+    /** Enables {@code POST /api/freshdesk/webhook}; Freshdesk must send the token in {@code X-PrintDesk-Token}. */
+    public Server withFreshdesk(FreshdeskConnector connector, String webhookToken) {
+        if (webhookToken == null || webhookToken.length() < 16) throw new IllegalArgumentException("FRESHDESK_WEBHOOK_TOKEN must be at least 16 characters");
+        this.freshdesk = connector;
+        this.freshdeskToken = webhookToken.getBytes(StandardCharsets.UTF_8);
+        return this;
+    }
+
+    /** Default 127.0.0.1. Set e.g. 0.0.0.0 behind a reverse proxy so Freshdesk can reach the webhook. */
+    public Server bindTo(String address) {
+        this.bindAddress = address;
+        return this;
+    }
+
     public HttpServer start(int port) throws IOException {
-        HttpServer s = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 0);
+        HttpServer s = HttpServer.create(new InetSocketAddress(bindAddress, port), 0);
         s.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
         s.createContext("/api/", this::api);
         s.createContext("/", this::files);
@@ -101,6 +120,8 @@ public final class Server {
                 triage(ex);
             } else if (path.equals("/api/complete") && method.equals("POST")) {
                 complete(ex);
+            } else if (path.equals("/api/freshdesk/webhook") && method.equals("POST")) {
+                freshdeskWebhook(ex);
             } else if (path.startsWith("/api/mail")) {
                 mail(ex, path, method, q);
             } else if (path.startsWith("/api/db/")) {
@@ -252,6 +273,37 @@ public final class Server {
             }
             default -> json(ex, 404, Map.of("error", "not found"));
         }
+    }
+
+    /**
+     * Freshdesk automation rules call this with {@code {"ticket_id": {{ticket.id}}, "event": "new_message"}}
+     * (ticket created, customer replied) or {@code "event": "resolved"}. Answers 202 at once and does
+     * the work in the background, because the agent takes longer than Freshdesk waits for a webhook.
+     */
+    private void freshdeskWebhook(HttpExchange ex) throws IOException {
+        if (freshdesk == null) {
+            json(ex, 404, Map.of("error", "Freshdesk is not configured"));
+            return;
+        }
+        String given = ex.getRequestHeaders().getFirst("X-PrintDesk-Token");
+        if (given == null || !MessageDigest.isEqual(freshdeskToken, given.getBytes(StandardCharsets.UTF_8))) {
+            json(ex, 401, Map.of("error", "bad token"));
+            return;
+        }
+        Map<String, Object> in = Json.parseObject(body(ex));
+        long id = (long) num(in, "ticket_id", -1);
+        if (id <= 0) throw new IllegalArgumentException("ticket_id is required");
+        String event = str(in, "event", "new_message");
+        if (!event.equals("new_message") && !event.equals("resolved")) throw new IllegalArgumentException("event must be new_message or resolved");
+        json(ex, 202, Map.of("accepted", true, "ticket_id", id, "event", event));
+        Thread.startVirtualThread(() -> {
+            try {
+                FreshdeskConnector.Outcome o = event.equals("resolved") ? freshdesk.handleResolved(id) : freshdesk.handleNewMessage(id);
+                System.out.printf("freshdesk ticket %d: %s %s%n", o.ticketId(), o.action(), o.detail());
+            } catch (Exception e) {
+                System.err.printf("freshdesk ticket %d failed: %s%n", id, e.getMessage());
+            }
+        });
     }
 
     // ------------------------------------------------------------------ static files

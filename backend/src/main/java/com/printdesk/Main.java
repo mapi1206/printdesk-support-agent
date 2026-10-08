@@ -7,6 +7,8 @@ import com.printdesk.agent.TriageAgent;
 import com.printdesk.api.LocalStore;
 import com.printdesk.api.Server;
 import com.printdesk.catalog.Catalog;
+import com.printdesk.freshdesk.FreshdeskConnector;
+import com.printdesk.freshdesk.HttpFreshdeskApi;
 import com.printdesk.knowledge.Learning;
 import com.printdesk.orders.OrderService;
 import com.printdesk.parts.PartRanker;
@@ -41,7 +43,23 @@ public final class Main {
         LlmClient llm = key == null || key.isBlank() ? null : new AnthropicClient(key);
         TriageAgent agent = llm == null ? null : new TriageAgent(catalog, tools, orders, llm, clock);
 
-        new Server(catalog, learning, ranker, agent, llm, new LocalStore(dbFile), frontend, data, clock).start(port);
+        Server server = new Server(catalog, learning, ranker, agent, llm, new LocalStore(dbFile), frontend, data, clock)
+                .bindTo(env("PRINTDESK_BIND", "127.0.0.1"));
+
+        // Optional: run the agent inside Freshdesk (see docs/freshdesk.md).
+        String fdKey = System.getenv("FRESHDESK_API_KEY"), fdDomain = System.getenv("FRESHDESK_DOMAIN");
+        if (fdKey != null && !fdKey.isBlank() && fdDomain != null && !fdDomain.isBlank()) {
+            String token = System.getenv("FRESHDESK_WEBHOOK_TOKEN");
+            if (agent == null) System.out.println("Freshdesk: not enabled – needs ANTHROPIC_API_KEY");
+            else if (token == null || token.length() < 16) System.out.println("Freshdesk: not enabled – set FRESHDESK_WEBHOOK_TOKEN (16+ characters)");
+            else {
+                FreshdeskConnector fd = new FreshdeskConnector(new HttpFreshdeskApi(HttpFreshdeskApi.baseUrlFor(fdDomain), fdKey),
+                        agent::triage, catalog, clock).withFixedStepField(System.getenv("FRESHDESK_FIXED_STEP_FIELD"));
+                server.withFreshdesk(fd, token);
+                System.out.println("Freshdesk: webhook enabled at /api/freshdesk/webhook for " + HttpFreshdeskApi.baseUrlFor(fdDomain));
+            }
+        }
+        server.start(port);
         System.out.printf("PrintDesk running on http://localhost:%d  (catalog: %d parts, %d problems, %d cases; Claude: %s)%n",
                 port, catalog.parts.size(), catalog.problems.size(), catalog.cases.size(), llm == null ? "off – set ANTHROPIC_API_KEY" : "on");
     }
