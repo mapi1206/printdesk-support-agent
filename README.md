@@ -6,9 +6,28 @@ includes troubleshooting steps ranked by real fix rates and compatible spare par
 3DJake catalog. A support colleague reviews, approves and sends it. Every outcome feeds back
 into the ranking, so the agent learns which fix actually works.
 
-> Built as an interview project. Prices, compatibility and availability come from 3djake.at
-> (snapshot 2026-10-05). Stock levels, orders and the 480-case history are **simulated** so the
-> statistics have something to work with.
+## The idea
+
+Support teams spend most of their time on the same steps: reading a message, working out what
+the customer has and what went wrong, looking up the order, finding the right fix and the right
+part, and then writing the answer. PrintDesk is a concept for handing that groundwork to AI while
+the people stay in charge.
+
+- **AI does the reading, looking up and drafting.** By the time a colleague opens a ticket, it is
+  already sorted, prioritised, summarised and answered in the customer's language.
+- **People make the decisions.** A colleague checks the draft, adjusts it if needed and sends it
+  with one click. Nothing goes out without a human.
+- **The facts come from the shop, not the model.** Prices, compatibility, orders and warranty come
+  from the shop's own data through tools, so the AI cannot make them up.
+- **It gets better with use.** Every closed ticket records what actually fixed the problem, and
+  the next suggestions are ranked by that.
+
+The aim is faster replies and less repetitive work for the support team, with a better answer for
+the customer.
+
+> The data comes from 3djake.at: prices, compatibility and availability (snapshot 2026-10-05).
+> Stock levels, orders and the 480-case history are **simulated** so the statistics have
+> something to work with.
 
 ![Support inbox: prioritised tickets, order check, ranked steps with fix rates, best-offer part](docs/screenshots/inbox.png)
 
@@ -177,7 +196,7 @@ docs/       architecture, demo script, screenshots
 - **Human approval before every send.** The agent drafts and a person decides. This contains model mistakes and injection attempts, and it is how the "AI drafts sent unedited" metric is measured.
 - **Model for language, code for numbers.** The model reads and writes. Priority, assignment, rankings, warranty and prices are deterministic code: testable, explainable, and stable across model versions.
 - **Tools instead of knowledge in the prompt.** The catalog, history and orders stay in the shop's data. The model asks for what it needs, and every id it returns is checked.
-- **No runtime dependencies in the backend.** It starts in under a second and has a small attack surface. Anyone can read all of it in an interview. A production version would use Spring Boot, PostgreSQL and a job queue for mail ingestion.
+- **No runtime dependencies in the backend.** It starts in under a second and has a small attack surface. The whole codebase can be read in an afternoon. A production version would use Spring Boot, PostgreSQL and a job queue for mail ingestion.
 
 ## Limitations and next steps
 
@@ -185,5 +204,18 @@ docs/       architecture, demo script, screenshots
 - Stock, orders and history are simulated. The next step would be connecting the shop system (Shopware/Shopify API) and the real ticket history.
 - Photo analysis works for uploaded images. Fetching Gmail attachments depends on the connector.
 - The eval set is small (24 emails). It should grow from real, anonymised tickets.
+
+## Future plans
+
+- **Several shops on one platform.** Each shop would have its own database (catalog, orders,
+  knowledge base, case history), its own mailboxes and its own team, with the same agent in
+  front of them. Adding a shop would be a configuration and data task, with no code changes.
+- **Beyond 3D printing.** The agent doesn't depend on 3D printers. The product-specific knowledge
+  lives in the data: products, compatibility, problems and troubleshooting steps. With a
+  different catalog and knowledge base, the same pipeline can handle support for electronics,
+  household appliances, bikes, software or any other product range. The pipeline works the same
+  way for any of them: read, triage, look up, draft, approve, learn.
+- **Shared learning.** Fix rates and approved solutions could be shared between shops that sell
+  the same products, so a new shop starts with a knowledge base that is already proven.
 
 Demo walkthrough: [docs/demo-script.md](docs/demo-script.md)
