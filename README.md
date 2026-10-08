@@ -6,6 +6,11 @@ includes troubleshooting steps ranked by real fix rates and compatible spare par
 3DJake catalog. A support colleague reviews, approves and sends it. Every outcome feeds back
 into the ranking, so the agent learns which fix actually works.
 
+**▶ [Try it live in claude.ai](https://claude.ai/artifact/SbYLBsKy4HFcpHukFEMPZn)**: open it,
+go to *Support* and click *Load demo emails*. Visitors get a private demo copy: nothing is
+saved or emailed, and the shop's real tickets aren't shown. The agent runs on the visitor's
+own claude.ai account, so you need to be signed in.
+
 > **Kurzfassung auf Deutsch.** PrintDesk nimmt dem Support-Team die Vorarbeit bei
 > Kundenanfragen ab. Der KI-Agent liest jede neue E-Mail, erkennt Sprache, Drucker, Problem und
 > Dringlichkeit und prüft Bestellung und Garantie im Shopsystem. Er schlägt die Lösungsschritte
