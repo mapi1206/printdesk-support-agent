@@ -6,6 +6,16 @@ includes troubleshooting steps ranked by real fix rates and compatible spare par
 3DJake catalog. A support colleague reviews, approves and sends it. Every outcome feeds back
 into the ranking, so the agent learns which fix actually works.
 
+> **Kurzfassung auf Deutsch.** PrintDesk nimmt dem Support-Team die Vorarbeit bei
+> Kundenanfragen ab. Der KI-Agent liest jede neue E-Mail, erkennt Sprache, Drucker, Problem und
+> Dringlichkeit und prüft Bestellung und Garantie im Shopsystem. Er schlägt die Lösungsschritte
+> vor, die in früheren Fällen tatsächlich geholfen haben, und das passende Ersatzteil aus dem
+> 3DJake-Katalog. Dann schreibt er einen Antwortentwurf in der Sprache der Kund:innen. Eine
+> Kollegin oder ein Kollege prüft den Entwurf und schickt ihn mit einem Klick ab – ohne
+> Freigabe geht nichts raus („Human First“). Antworten die Kund:innen, öffnet sich das Ticket
+> automatisch wieder. Jeder gelöste Fall verbessert die nächsten Vorschläge.
+> Für das Team: [Leitfaden für den Support (DE)](docs/de/leitfaden-support.md).
+
 ## The idea
 
 Support teams spend most of their time on the same steps: reading a message, working out what
@@ -215,6 +225,43 @@ solved the problem. These numbers decide the order of the suggestions.*
 
 ---
 
+## Measuring success
+
+Every AI use case should say up front what it should improve and how that is measured.
+
+**Goal:** faster and more consistent first replies, and less repetitive searching and typing
+for the support team, without lower answer quality.
+
+| What should improve | How it is measured | Where |
+|---|---|---|
+| Time to first reply | Median minutes from email received to reply sent, per priority | Insights → *Median time to reply* |
+| Replies on time | Share of tickets answered within their reply deadline (P1 2 h … P4 48 h) | Ticket deadlines, overdue alerts |
+| Quality of the AI draft | Share of drafts sent **unedited**. Colleagues rate each AI suggestion (1–5). | Insights → *AI replies sent unedited*, *AI suggestion rating* |
+| Problem actually solved | Resolution rate. Share fixed within the first two steps. | Insights → *Resolved*, *Fixed within 2 steps* |
+| Customer satisfaction | Customer rating, and how many come back with "didn't help" | Insights → *Customer rating*; follow-ups per ticket |
+| Correct understanding | Language, printer, problem, manipulation and safety detection on labelled emails | Settings → **Evaluation** (see [Evaluation](#evaluation)) |
+
+**Rollout with a measured baseline:**
+
+1. **Baseline (2 weeks).** Measure today's reply time and resolution rate without PrintDesk.
+2. **Shadow mode (2 weeks).** PrintDesk drafts but the team answers as usual. Compare drafts
+   with the real answers and grow the eval set from the mistakes.
+3. **Pilot (one team or language, 4 weeks).** Drafts are used. Go on only if reply time drops,
+   resolution rate and ratings stay at least the same, and safety cases are always caught.
+4. **Rollout** to the other teams and mailboxes, with the eval run after every prompt change.
+
+## Documents for the team
+
+| For | Document |
+|---|---|
+| Support colleagues (German) | [Leitfaden für den Support](docs/de/leitfaden-support.md): daily workflow, warning signs, how to improve the system |
+| IT | [Integration brief](docs/integration.md): what is simulated, what replaces it, rough effort, questions |
+| Legal | [Privacy brief](docs/privacy.md): personal data, recipients, retention, transparency, open points |
+| Developers and coding agents | [CLAUDE.md](CLAUDE.md): ground rules, where the agent's context lives, checks before a change |
+| Demo | [Demo script](docs/demo-script.md) · [Architecture](docs/architecture.md) |
+
+---
+
 ## What it does
 
 | Area | What happens |
@@ -331,9 +378,14 @@ fix rate  = cases solved by step ÷ cases that reached step
 
 ## Evaluation
 
-`evals/emails.jsonl` holds 24 labelled emails in 10 languages: real support cases, non-support
-mail, two injection attempts and safety cases. The runner scores every labelled field and lists
-each miss:
+`evals/emails.jsonl` holds 24 labelled emails in 10 languages: realistic support cases,
+non-support mail, two manipulation attempts and safety cases. Each labelled field is scored and
+every miss is listed. There are two ways to run it:
+
+- **In the app (claude.ai):** Settings → **Evaluation** → *Run evaluation*. The emails go
+  through exactly the same pre-filter, agent and validation as the inbox. No tickets are created
+  and nothing is emailed. Runs are saved, so they can be compared after every change.
+- **From the command line** (Java backend, needs an API key):
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
@@ -345,7 +397,8 @@ PrintDesk triage eval – 24 emails
 is_support   …/4   lang …/19   printer …/21   problem …/18   suspicious …/2   escalate …/2
 ```
 
-Run it after every prompt change. The labels are the regression suite for the agent.
+Run it after every prompt change. The labels are the regression suite for the agent. When the
+agent gets a new kind of email wrong, the email is added here with its labels before the fix.
 
 ## Tests
 
@@ -364,16 +417,18 @@ GitHub Actions runs them on every push.
 
 ```
 frontend/   index.html (the app) · local-runtime.js (maps the app onto the Java API when run locally)
+            mailbox.html (the customer's side of the local demo mailbox)
 backend/    Java 21, no runtime dependencies
   agent/      Claude client, tool-use loop, prompts, tools, models
   triage/     priority, pre-filter, injection guard
   knowledge/  learning loop (fix rates, step ranking)
   parts/      best-offer ranking        orders/  order lookup, warranty
-  team/       assignment                api/     HTTP server, local document store
+  team/       assignment                api/     HTTP server, local document store, demo mailbox
   eval/       eval runner
 data/       generate.py → data.json + tables/*.csv + printdesk_data.xlsx (3DJake snapshot, simulated history)
 evals/      labelled test emails
-docs/       architecture, demo script, screenshots
+docs/       architecture, demo script, integration (IT), privacy (Legal), de/ support guide, screenshots, demo video
+CLAUDE.md   context and rules for coding agents working on this repo
 ```
 
 ## Design decisions
