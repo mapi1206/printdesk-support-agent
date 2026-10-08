@@ -1,0 +1,78 @@
+order_no,name,email,date,delivered,status,warranty_until,items
+3DJ-2026-048213,Szabó Péter,szabo.peter@example.com,2026-04-08,2026-04-11,delivered,2028-04-08,Bambu Lab P1S Combo|Engineering Plate (256 mm)
+3DJ-2024-077315,James Carter,james.carter@example.com,2024-03-12,2024-03-15,delivered,2026-03-12,Bambu Lab X1 Carbon Combo
+3DJ-2219-8841,Markus Weber,markus.weber@example.com,2025-02-14,2025-02-17,delivered,2027-02-14,Bambu Lab P1S
+3DJ-2026-061190,Camille Laurent,camille.laurent@example.com,2026-06-17,2026-06-20,delivered,2028-06-17,Bambu Lab P2S Combo
+3DJ-2025-151877,Tóth Eszter,toth.eszter@example.com,2025-12-03,2025-12-06,delivered,2027-12-03,Bambu Lab A1 mini|Purge Wiper (A1 / A1 mini)
+3DJ-2026-031544,Kertész Alma,kertesz.alma@example.com,2026-03-10,2026-03-13,delivered,2028-03-10,Bambu Lab P1S Combo
+3DJ-2025-102233,Piotr Nowak,piotr.nowak@example.com,2025-08-21,2025-08-24,delivered,2027-08-21,Bambu Lab P1S|Bambu Textured PEI Plate (256 mm)
+3DJ-2026-196658,Greta Kowalski,greta.kowalski@example.com,2026-07-09,2026-07-12,delivered,2028-07-09,Bambu Lab A1 mini Combo
+3DJ-2026-143152,Clara Horváth,clara.horvath@example.com,2026-03-13,2026-03-16,delivered,2028-03-13,Bambu Lab P1S Combo
+3DJ-2025-177664,David Bauer,david.bauer@example.com,2025-05-27,2025-05-30,delivered,2027-05-27,"Bambu Lab P1S|Bambu Textured PEI Plate (256 mm)|Hotend - P1 Series, 0.4 mm hardened steel"
+3DJ-2026-107134,Ivan Horváth,ivan.horvath@example.com,2026-06-12,2026-06-15,delivered,2028-06-12,Bambu Lab X2D|Capricorn Bambu Lab AMS Kit (low-friction PTFE)|Desiccant for AMS (6 pcs)
+3DJ-2024-181965,Hannah Novak,hannah.novak@example.com,2024-07-28,2024-07-31,delivered,2026-07-28,"Bambu Lab P1S Combo|AMS Mainboard|All Metal Hot-End, 0.4 mm hardened steel (X1 / P1)"
+3DJ-2025-190880,Bence Kovács,bence.kovacs@example.com,2025-09-09,2025-09-12,delivered,2027-09-09,Bambu Lab A1 mini Combo|AMS Lite Filament Hub
+3DJ-2025-188809,Oskar Kovács,oskar.kovacs@example.com,2025-11-26,2025-11-29,delivered,2027-11-26,Bambu Lab A1 mini Combo|Hotend Heating Assembly (A1 / A1 mini)|AMS Lite Filament Hub
+3DJ-2026-178587,Marco Moreau,marco.moreau@example.com,2026-06-24,2026-06-27,delivered,2028-06-24,"Bambu Lab A1 mini|Conch Hotend M4, 0.8 mm (A1 / A1 mini)|AMS lite Feeder Unit"
+3DJ-2025-181163,Oskar Moreau,oskar.moreau@example.com,2025-06-12,2025-06-15,delivered,2027-06-12,Bambu Lab P1S Combo|3D Effect Plate Carbon Fiber (256 mm)|Capricorn Bambu Lab AMS Kit (low-friction PTFE)
+3DJ-2025-125228,Viktor Bauer,viktor.bauer@example.com,2025-06-23,2025-06-26,delivered,2027-06-23,Bambu Lab P1S Combo|4-in-1 PTFE Adapter
+3DJ-2025-175132,Wiebke Novak,wiebke.novak@example.com,2025-01-31,2025-02-03,delivered,2027-01-31,Bambu Lab A1 mini Combo
+3DJ-2025-118045,Lena Varga,lena.varga@example.com,2025-05-26,2025-05-29,delivered,2027-05-26,"Bambu Lab P1S|High Flow ObXidian HotEnd, 0.4 mm (X1 / P1)|Ceramic Heater & Thermistor (P1P / P1S)"
+3DJ-2025-176502,Julia Varga,julia.varga@example.com,2025-04-23,2025-04-26,delivered,2027-04-23,"Bambu Lab A1 mini|Conch Hotend M4, 0.4 mm (H2D / A1 / A1 mini)"
+3DJ-2025-148343,Emma Lehner,emma.lehner@example.com,2025-11-18,2025-11-21,delivered,2027-11-18,Bambu Lab P1S|Bambu Bus Cable - 4 pin
+3DJ-2026-166467,Viktor Dubois,viktor.dubois@example.com,2026-08-03,2026-08-06,delivered,2028-08-03,Bambu Lab P1S
+3DJ-2025-126263,Bence Varga,bence.varga@example.com,2025-10-13,2025-10-16,delivered,2027-10-13,Bambu Lab P1S
+3DJ-2026-178612,Clara Kowalski,clara.kowalski@example.com,2026-03-21,2026-03-24,delivered,2028-03-21,Bambu Lab A1|AMS Mainboard|PTFE Tube (AMS Hub)
+3DJ-2025-143072,Stefan Kowalski,stefan.kowalski@example.com,2025-01-08,2025-01-11,delivered,2027-01-08,Bambu Lab P2S Combo|Bambu Textured PEI Plate (256 mm)
+3DJ-2026-183724,Bence Lehner,bence.lehner@example.com,2026-02-18,2026-02-21,delivered,2028-02-18,Bambu Lab A1 Combo
+3DJ-2026-143452,Tomasz Nagy,tomasz.nagy@example.com,2026-01-29,2026-02-01,delivered,2028-01-29,Bambu Lab A1|Bambu Textured PEI Plate (256 mm)|Bambu Dual Texture PEI Plate (256 mm)
+3DJ-2024-147555,Marco Schmidt,marco.schmidt@example.com,2024-06-07,2024-06-10,delivered,2026-06-07,Bambu Lab A1 Combo
+3DJ-2026-125480,Rita Rossi,rita.rossi@example.com,2026-05-08,2026-05-11,delivered,2028-05-08,Bambu Lab A1|PTFE Tube (AMS Hub)
+3DJ-2026-125929,Lena Kovács,lena.kovacs@example.com,2026-08-31,2026-09-03,delivered,2028-08-31,Bambu Lab P2S Combo
+3DJ-2025-123401,Ivan Schmidt,ivan.schmidt@example.com,2025-10-18,2025-10-21,delivered,2027-10-18,Bambu Lab A1 Combo
+3DJ-2026-149666,Ivan Rossi,ivan.rossi@example.com,2026-09-09,2026-09-12,delivered,2028-09-09,Bambu Lab A1 mini
+3DJ-2025-148804,Kristóf Nagy,kristof.nagy@example.com,2025-11-22,2025-11-25,delivered,2027-11-22,Bambu Lab P2S|Live View Camera (P2S)|AMS Feeder Unit (AMS 2 Pro)
+3DJ-2024-115531,Tomasz Varga,tomasz.varga@example.com,2024-10-02,2024-10-05,delivered,2026-10-02,Bambu Lab X2D Combo
+3DJ-2025-178584,Greta Nagy,greta.nagy@example.com,2025-04-03,2025-04-06,delivered,2027-04-03,Bambu Lab X2D Combo|Desiccant for AMS (6 pcs)|Panda Build Plate CryoGrip Pro Glacier (256 mm)
+3DJ-2024-119472,Bence Nagy,bence.nagy@example.com,2024-05-09,2024-05-12,delivered,2026-05-09,Bambu Lab P1S Combo|Bambu Textured PEI Plate (256 mm)
+3DJ-2024-110670,Ivan Dubois,ivan.dubois@example.com,2024-05-12,2024-05-15,delivered,2026-05-12,"Bambu Lab A1 mini|Conch Hotend M4, 0.8 mm (A1 / A1 mini)|PTFE Tube (AMS Hub)"
+3DJ-2026-184550,Tomasz Novak,tomasz.novak@example.com,2026-04-12,2026-04-15,delivered,2028-04-12,Bambu Lab P1S|AMS Mainboard|3D Effect Plate Carbon Fiber (256 mm)
+3DJ-2026-149005,Quentin Huber,quentin.huber@example.com,2026-03-31,2026-04-03,delivered,2028-03-31,Bambu Lab A1 Combo|AMS Mainboard
+3DJ-2025-128773,Petra Lehner,petra.lehner@example.com,2025-12-30,2026-01-02,delivered,2027-12-30,"Bambu Lab A2L|Hotend - A1/A2 Series, 0.4 mm hardened steel|High Flow ObXidian HotEnd, 0.4 mm (A1 / A1 mini / A2L)"
+3DJ-2026-149425,Hannah Moreau,hannah.moreau@example.com,2026-02-19,2026-02-22,delivered,2028-02-19,Bambu Lab A1|Y Belt (A1)
+3DJ-2025-117606,Lena Weber,lena.weber@example.com,2025-03-16,2025-03-19,delivered,2027-03-16,Bambu Lab X2D
+3DJ-2026-160981,Quentin Fischer,quentin.fischer@example.com,2026-02-07,2026-02-10,delivered,2028-02-07,Bambu Lab A1 Combo
+3DJ-2025-165213,Oskar Huber,oskar.huber@example.com,2025-07-15,2025-07-18,delivered,2027-07-15,Bambu Lab A1 Combo|Purge Wiper (A1 / A1 mini)|Engineering Plate (256 mm)
+3DJ-2026-109946,Felix Huber,felix.huber@example.com,2026-02-03,2026-02-06,delivered,2028-02-03,Bambu Lab A1 Combo|AMS Lite Filament Hub
+3DJ-2024-129850,Quentin Novak,quentin.novak@example.com,2024-07-18,2024-07-21,delivered,2026-07-18,Bambu Lab A1 mini Combo|AMS Lite Filament Hub
+3DJ-2025-188487,Bence Nagy,bence.nagy@example.com,2025-10-24,2025-10-27,delivered,2027-10-24,Bambu Lab A1 mini Combo
+3DJ-2026-198616,Viktor Weber,viktor.weber@example.com,2026-03-19,2026-03-22,delivered,2028-03-19,Bambu Lab A1
+3DJ-2024-145433,Ivan Bauer,ivan.bauer@example.com,2024-08-03,2024-08-06,delivered,2026-08-03,Bambu Lab P1S|Bambu Bus Cable - 4 pin
+3DJ-2025-152101,Marco Bauer,marco.bauer@example.com,2025-06-04,2025-06-07,delivered,2027-06-04,Bambu Lab A1 Combo
+3DJ-2026-160476,Greta Lehner,greta.lehner@example.com,2026-02-03,2026-02-06,delivered,2028-02-03,Bambu Lab P1S Combo|Desiccant for AMS (6 pcs)|Bambu Dual Texture PEI Plate (256 mm)
+3DJ-2024-158978,Greta Varga,greta.varga@example.com,2024-08-03,2024-08-06,delivered,2026-08-03,"Bambu Lab A1 mini|Conch Hotend M4, 0.8 mm (A1 / A1 mini)|Filament Sensor (A1 / A1 mini)"
+3DJ-2025-165509,Emma Dubois,emma.dubois@example.com,2025-11-22,2025-11-25,delivered,2027-11-22,Bambu Lab A1 mini
+3DJ-2025-142739,Kristóf Horváth,kristof.horvath@example.com,2025-07-28,2025-07-31,delivered,2027-07-28,Bambu Lab P2S|Desiccant for AMS (6 pcs)|4-in-1 PTFE Adapter
+3DJ-2026-182554,Bence Dubois,bence.dubois@example.com,2026-04-26,2026-04-29,delivered,2028-04-26,Bambu Lab P1S|4-in-1 PTFE Adapter
+3DJ-2025-151201,Stefan Moreau,stefan.moreau@example.com,2025-09-05,2025-09-08,delivered,2027-09-05,Bambu Lab P2S Combo
+3DJ-2025-139930,Petra Rossi,petra.rossi@example.com,2025-10-29,2025-11-01,delivered,2027-10-29,Bambu Lab A1 Combo|AMS Lite Filament Hub|Arkfly POPweb Cool Plate (256 mm)
+3DJ-2026-126083,Rita Schmidt,rita.schmidt@example.com,2026-08-29,2026-09-01,delivered,2028-08-29,"Bambu Lab A1 mini Combo|Hotend - A1/A2 Series, 0.4 mm hardened steel|Panda Juicer Hotend SF, hardened steel 0.4 mm (A1 / A1 mini)"
+3DJ-2026-109172,Julia Nagy,julia.nagy@example.com,2026-02-04,2026-02-07,delivered,2028-02-04,Bambu Lab X2D Combo|3D Effect Plate Carbon Fiber (256 mm)
+3DJ-2025-114515,Anna Schmidt,anna.schmidt@example.com,2025-10-31,2025-11-03,delivered,2027-10-31,"Bambu Lab A1 Combo|X Belt (A1)|Hot-End A1 Series, 0.4 mm hardened steel"
+3DJ-2025-117030,Zoltán Novak,zoltan.novak@example.com,2025-08-28,2025-08-31,delivered,2027-08-28,Bambu Lab A1
+3DJ-2026-126604,Wiebke Lehner,wiebke.lehner@example.com,2026-04-21,2026-04-24,delivered,2028-04-21,Bambu Lab A1 Combo|AMS Internal Hub Unit
+3DJ-2026-158422,Ivan Nagy,ivan.nagy@example.com,2026-09-23,2026-09-26,delivered,2028-09-23,Bambu Lab P1S Combo
+3DJ-2025-105122,Hannah Kowalski,hannah.kowalski@example.com,2025-02-25,2025-02-28,delivered,2027-02-25,Bambu Lab A1|PTFE Tube (AMS Hub)|AMS Internal Hub Unit
+3DJ-2024-180350,Oskar Fischer,oskar.fischer@example.com,2024-10-13,2024-10-16,delivered,2026-10-13,Bambu Lab A1|X Belt (A1)
+3DJ-2026-186386,Nora Horváth,nora.horvath@example.com,2026-03-31,2026-04-03,delivered,2028-03-31,Bambu Lab P2S Combo|Engineering Plate (256 mm)|Desiccant for AMS (6 pcs)
+3DJ-2026-135884,Marco Kovács,marco.kovacs@example.com,2026-01-28,2026-01-31,delivered,2028-01-28,Bambu Lab P1S
+3DJ-2024-164682,Viktor Novak,viktor.novak@example.com,2024-10-16,2024-10-19,delivered,2026-10-16,Bambu Lab P1S Combo
+3DJ-2026-166112,David Fischer,david.fischer@example.com,2026-07-14,2026-07-17,delivered,2028-07-14,Bambu Lab P1S
+3DJ-2026-166330,Oskar Schmidt,oskar.schmidt@example.com,2026-01-15,2026-01-18,delivered,2028-01-15,Bambu Lab A1 Combo
+3DJ-2025-152342,Ursula Huber,ursula.huber@example.com,2025-09-05,2025-09-08,delivered,2027-09-05,Bambu Lab A1 mini|PTFE Tube (AMS Hub)
+3DJ-2026-142875,Anna Weber,anna.weber@example.com,2026-06-05,2026-06-08,delivered,2028-06-05,Bambu Lab A1
+3DJ-2026-193530,Oskar Novak,oskar.novak@example.com,2026-07-08,2026-07-11,delivered,2028-07-08,Bambu Lab A2L
+3DJ-2026-179559,Ivan Schmidt,ivan.schmidt@example.com,2026-04-09,2026-04-12,delivered,2028-04-09,Bambu Lab A1 mini Combo
+3DJ-2026-188000,Rita Moreau,rita.moreau@example.com,2026-04-11,2026-04-14,delivered,2028-04-11,Bambu Lab A1
+3DJ-2025-128399,Emma Huber,emma.huber@example.com,2025-09-29,2025-10-02,delivered,2027-09-29,Bambu Lab P1S
+3DJ-2025-183203,Rita Nagy,rita.nagy@example.com,2025-07-05,2025-07-08,delivered,2027-07-05,Bambu Lab P2S

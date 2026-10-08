@@ -1,0 +1,10 @@
+id,name,series,enclosed,plate,hotend,price,combo,released,ams
+a1mini,A1 mini,A,False,180,A,189.0,299.0,2023,AMS lite
+a1,A1,A,False,256,A,259.0,369.0,2023,AMS lite / AMS
+a2l,A2L,A,False,330,A,379.0,489.0,2026,AMS lite / AMS 2 Pro / AMS HT
+p1p,P1P,P,False,256,P1,,,2022,AMS
+p1s,P1S,P,True,256,P1,379.0,529.0,2023,AMS / AMS 2 Pro
+p2s,P2S,P,True,256,H2,519.0,699.0,2025,AMS 2 Pro / AMS HT
+x1c,X1 Carbon,X,True,256,X1,,,2022,AMS / AMS 2 Pro
+x2d,X2D,X,True,256,H2,629.0,849.0,2026,AMS 2 Pro / AMS HT
+h2d,H2D,H,True,350,H2,,,2025,AMS 2 Pro / AMS HT

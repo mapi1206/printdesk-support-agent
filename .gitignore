@@ -1,0 +1,8 @@
+backend/target/
+data/local-db.json
+*.tmp
+__pycache__/
+.DS_Store
+.idea/
+*.iml
+.vscode/

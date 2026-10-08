@@ -1,0 +1,189 @@
+# PrintDesk – AI support agent for a 3D-printing shop
+
+PrintDesk reads customer emails and chats about Bambu Lab printers, works out the printer,
+the problem and how urgent it is, and drafts a reply in the customer's language. The draft
+includes troubleshooting steps ranked by real fix rates and compatible spare parts from the
+3DJake catalog. A support colleague reviews, approves and sends it. Every outcome feeds back
+into the ranking, so the agent learns which fix actually works.
+
+> Built as an interview project. Prices, compatibility and availability come from 3djake.at
+> (snapshot 2026-10-05). Stock levels, orders and the 480-case history are **simulated** so the
+> statistics have something to work with.
+
+![Support inbox: prioritised tickets, order check, ranked steps with fix rates, best-offer part](docs/screenshots/inbox.png)
+
+---
+
+## What it does
+
+| Area | What happens |
+|---|---|
+| **Email → ticket** | New mail to the support address(es) becomes a ticket. A cheap rule-based filter sets aside newsletters, bounces and auto-replies before any model call. |
+| **Triage agent** | Claude detects language, printer, problem, urgency, mood, deadline and safety risks. It calls tools for the order, the ranked troubleshooting steps and compatible parts, then writes a summary for the colleague and a reply draft for the customer. |
+| **Explainable priority** | P1–P4 from a points formula. Every point is shown with its reason, for example "Safety risk +50" or "Waiting 3 h +6", along with the reply deadline. |
+| **Human in the loop** | Nothing is sent automatically. A colleague can edit the draft or ask the agent to rewrite it ("shorter", "offer the alternative"), then **Approve → Send**. Replies go out in the same Gmail thread. |
+| **Follow-ups** | If the customer writes back, the same ticket reopens with the whole conversation. "Didn't help" → the next steps, no repeats. "It works now" → **Close as solved** with the step that fixed it. |
+| **Learning loop** | Fix rate per step = cases solved by the step ÷ cases that reached it. Steps are re-ranked as outcomes come in. Free checks always come before part replacements. |
+| **Best offer** | Compatible parts are ranked by price, shipping, delivery time, stock, original vs. alternative and how often the part fixed past cases. Each part has a detail view with specs, what it fixes and alternatives. |
+| **Order check** | The order is looked up by order number or sender address. Warranty and printer model come from the order, not from what the customer claims, and mismatches are flagged. |
+| **Team** | Automatic assignment that gets everyone to a daily minimum, considering open tickets and languages. Personal mailboxes always go to their owner. Includes internal notes and overdue alerts by email. |
+| **Knowledge base** | Search across problems and steps. Anyone can propose a step or a new problem; a lead approves it, and the agent uses it right away. |
+| **Insights** | Resolution rate, first-contact fixes, escalations, ratings, share of AI drafts sent unedited, time to reply, top problems, weekly spike alerts (possible batch issues) and stock alerts. |
+| **Safety & privacy** | Prompt-injection guard (prompt rule, pattern scan and a foreign-link check), plus GDPR retention: closed tickets are anonymised after N days and can be deleted. |
+
+More screenshots: [part detail](docs/screenshots/part-detail.png) · [insights](docs/screenshots/insights.png) · [knowledge base](docs/screenshots/knowledge.png)
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Inbound
+    G[Gmail support addresses] -->|poll every 60 s| I[Ingest]
+    C[Customer chat] --> I
+    P[Phone quick mode] --> I
+  end
+  I --> F{Pre-filter<br/>rules, no model call}
+  F -->|newsletter / bounce / auto-reply| X[Filtered]
+  F -->|support| A[Triage agent<br/>Claude + tools]
+  A <-->|tool calls| T[(Tools<br/>lookup_order · get_troubleshooting<br/>find_parts · check_warranty)]
+  T --- K[(Catalog · knowledge base<br/>case history · orders)]
+  A --> V[Validate output<br/>drop unknown ids · order facts win<br/>injection scan · link check]
+  V --> PR[Priority P1–P4<br/>+ assignment]
+  PR --> H[Colleague reviews<br/>edit · rewrite · approve]
+  H -->|send| G2[Reply in Gmail thread]
+  G2 --> O[Outcome: what fixed it]
+  O -->|new case| K
+```
+
+The repository has two ways to run the same product:
+
+1. **In claude.ai (the live demo).** `frontend/index.html` runs as a Claude Artifact. The
+   artifact runtime provides Claude calls (with page-side tools), a shared database, and the
+   user's Gmail connector for reading the inbox and replying.
+2. **Locally with the Java backend.** `backend/` is a zero-dependency Java 21 server. It runs
+   the server-side triage agent (the Claude tool-use loop, with the API key kept on the server),
+   exposes a REST API and serves the same UI. `frontend/local-runtime.js` maps the UI's runtime
+   calls onto that API. Gmail is not wired up locally; you paste emails or load the demo set.
+
+Details: [docs/architecture.md](docs/architecture.md)
+
+---
+
+## Run it locally
+
+Requirements: Java 21+, Maven 3.9+ (only for building and tests). There are no runtime dependencies.
+
+```bash
+cd backend && mvn -q package && cd ..
+export ANTHROPIC_API_KEY=sk-ant-...        # optional; without it the UI runs in knowledge-base mode
+java -jar backend/target/printdesk.jar     # run from the repository root
+# open http://localhost:8080 → Support → "Load demo emails"
+```
+
+| Env var | Default | Meaning |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | – | Enables the agent |
+| `PRINTDESK_MODEL` / `PRINTDESK_MODEL_QUICK` | `claude-sonnet-5-5` / `claude-haiku-4-5-20251001` | Model for triage and for quick jobs |
+| `PORT` | `8080` | HTTP port (binds to 127.0.0.1) |
+| `PRINTDESK_DATA` | `data/data.json` | Catalog, knowledge base, history, orders |
+| `PRINTDESK_DB` | `data/local-db.json` | Local ticket store |
+| `ANTHROPIC_BASE_URL` | `https://api.anthropic.com` | Point to a gateway or a mock |
+
+### REST API
+
+```bash
+curl -s localhost:8080/api/triage -d '{"from_email":"markus.weber@example.com","subject":"P1S druckt nicht",
+  "body":"Nach einer Stunde kommt kein Filament mehr, PLA, Tür zu. Bestellung 3DJ-2219-8841"}'
+curl -s "localhost:8080/api/parts?printer=p1s&cat=hotend&prio=balanced"
+curl -s "localhost:8080/api/troubleshoot?problem=P05&printer=p1s"
+```
+
+`/api/triage` returns the validated triage result (language, printer, problem, steps, parts,
+reply with order links, injection flags, tool trace) plus the priority with its reasons.
+
+---
+
+## How the agent works
+
+1. **Pre-filter** ([`PreFilter`](backend/src/main/java/com/printdesk/triage/PreFilter.java)): regex rules for bounces, auto-replies, no-reply senders and newsletters. Anything that mentions a printer or an order always goes through.
+2. **Prompt** ([`Prompts`](backend/src/main/java/com/printdesk/agent/Prompts.java)): shop rules, the printer list, the problem index, the output schema and a security rule that marks customer text as untrusted data.
+3. **Tool loop** ([`TriageAgent`](backend/src/main/java/com/printdesk/agent/TriageAgent.java)): the model calls tools until it can answer, for at most 6 rounds. Tool errors go back to the model as `is_error` results rather than crashing.
+4. **Tools** ([`Tools`](backend/src/main/java/com/printdesk/agent/Tools.java)): every price, part id, compatibility fact and warranty comes from the shop's data, never from the model's memory.
+5. **Validation**: unknown step and part ids are dropped, enum fields are clamped, and the order wins over the model and the customer (warranty, printer). `[[LINK:id]]` tokens become shop links. Customer text is scanned for injection attempts and the reply for foreign links.
+6. **Priority & assignment** ([`Priority`](backend/src/main/java/com/printdesk/triage/Priority.java), [`Assigner`](backend/src/main/java/com/printdesk/team/Assigner.java)): deterministic and explainable, kept out of the model on purpose.
+
+```
+priority  = safety 50 · urgent 25 / time-sensitive 10 · angry 15 / frustrated 8 · printer down 10
+            · deadline 10 · in warranty 5 · repeat contact 8 · personal mailbox +boost · waiting 2/h (max 20)
+            P1 ≥ 60 (reply in 2 h) · P2 ≥ 40 (8 h) · P3 ≥ 20 (24 h) · P4 (48 h)
+assignee  = max( 10 × (daily minimum − handled today) − 4 × open tickets + 6 if speaks the language )
+best part = min( price + shipping + 1.2 × days + 4 if not original + 25 if out of stock − bonus for past fixes )
+fix rate  = cases solved by step ÷ cases that reached step
+```
+
+---
+
+## Evaluation
+
+`evals/emails.jsonl` holds 24 labelled emails in 10 languages: real support cases, non-support
+mail, two injection attempts and safety cases. The runner scores every labelled field and lists
+each miss:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+java -cp backend/target/printdesk.jar com.printdesk.eval.EvalRunner evals/emails.jsonl
+```
+
+```
+PrintDesk triage eval – 24 emails
+is_support   …/4   lang …/19   printer …/21   problem …/18   suspicious …/2   escalate …/2
+```
+
+Run it after every prompt change. The labels are the regression suite for the agent.
+
+## Tests
+
+```bash
+cd backend && mvn test
+```
+
+32 JUnit tests cover the JSON codec, priority, pre-filter, injection guard, assignment, the
+learning loop, part ranking, orders and warranty, and the full agent loop against a scripted
+fake model (tool calls, error handling, output validation), all without network access.
+GitHub Actions runs them on every push.
+
+---
+
+## Project structure
+
+```
+frontend/   index.html (the app) · local-runtime.js (maps the app onto the Java API when run locally)
+backend/    Java 21, no runtime dependencies
+  agent/      Claude client, tool-use loop, prompts, tools, models
+  triage/     priority, pre-filter, injection guard
+  knowledge/  learning loop (fix rates, step ranking)
+  parts/      best-offer ranking        orders/  order lookup, warranty
+  team/       assignment                api/     HTTP server, local document store
+  eval/       eval runner
+data/       generate.py → data.json + tables/*.csv + printdesk_data.xlsx (3DJake snapshot, simulated history)
+evals/      labelled test emails
+docs/       architecture, demo script, screenshots
+```
+
+## Design decisions
+
+- **Human approval before every send.** The agent drafts and a person decides. This contains model mistakes and injection attempts, and it is how the "AI drafts sent unedited" metric is measured.
+- **Model for language, code for numbers.** The model reads and writes. Priority, assignment, rankings, warranty and prices are deterministic code: testable, explainable, and stable across model versions.
+- **Tools instead of knowledge in the prompt.** The catalog, history and orders stay in the shop's data. The model asks for what it needs, and every id it returns is checked.
+- **No runtime dependencies in the backend.** It starts in under a second and has a small attack surface. Anyone can read all of it in an interview. A production version would use Spring Boot, PostgreSQL and a job queue for mail ingestion.
+
+## Limitations and next steps
+
+- Running locally, mail ingestion is not wired up (Gmail works in the claude.ai version). In production a scheduled worker would poll the mailbox and run triage with no browser open.
+- Stock, orders and history are simulated. The next step would be connecting the shop system (Shopware/Shopify API) and the real ticket history.
+- Photo analysis works for uploaded images. Fetching Gmail attachments depends on the connector.
+- The eval set is small (24 emails). It should grow from real, anonymised tickets.
+
+Demo walkthrough: [docs/demo-script.md](docs/demo-script.md)

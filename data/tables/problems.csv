@@ -1,0 +1,15 @@
+id,cat,en,de,kw,printers
+P01,extrusion,Nozzle clog / under-extrusion,Düse verstopft / Unterextrusion,clog clogged verstopft under-extrusion nothing comes out no filament thin lines gaps,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+P02,extrusion,Heat creep with PLA in enclosed printer,Heat Creep mit PLA im geschlossenen Drucker,heat creep PLA door closed jams after hours enclosed warm chamber softens,p1s|p2s|x1c|x2d|h2d
+P03,adhesion,First layer does not stick,Erste Schicht haftet nicht,adhesion first layer not sticking lifts off bed haftung erste schicht löst sich,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+P04,adhesion,Warping with ABS / ASA,Verzug bei ABS / ASA,warping warp corners lift ABS ASA verzug ecken heben sich,p1s|p2s|x1c|x2d|h2d
+P05,ams,AMS fails to feed / filament stuck,AMS fördert nicht / Filament steckt fest,AMS feed failed load unload stuck filament hub assist motor slot error,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+P06,ams,Filament cut failed,Filament konnte nicht geschnitten werden,cut failed cutter blade lever filament cutting error schneiden,p1p|p1s|x1c|p2s|x2d|h2d
+P07,electronics,Nozzle temperature error (HMS),Düsentemperatur-Fehler (HMS),temperature abnormal heating failed thermistor HMS error nozzle temp 0300 heater,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+P08,motion,Layer shift,Schichtversatz,layer shift shifted offset versatz verschoben,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+P09,quality,Stringing / oozing,Fädenziehen / Nachtropfen,stringing strings hairs oozing fäden spinnweben,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+P10,connectivity,Wi-Fi / cloud connection lost,WLAN-/Cloud-Verbindung verloren,wifi wlan offline cloud connection bambu handy not connected network,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+P11,extrusion,Extruder clicking / skipping,Extruder klickt / überspringt,clicking skipping extruder grinding klicken knacken,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+P12,electronics,Noisy or failed fan,Lauter oder defekter Lüfter,fan noise loud rattle fan error lüfter laut rattert,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+P13,calibration,Bed levelling / homing fails,Bettnivellierung / Referenzfahrt schlägt fehl,levelling leveling homing failed probe z offset nozzle too high too low,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+P14,quality,Wrong nozzle for carbon-fibre filament,Falsche Düse für Carbonfaser-Filament,carbon fiber CF GF abrasive nozzle wear hardened stainless CF filament,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d

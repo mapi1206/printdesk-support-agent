@@ -1,0 +1,56 @@
+problem,step,order,en,de,part_cat,part_hint
+P01,P01-S1,1,Check the spool and filament path for tangles or kinks.,Spule und Filamentweg auf Knoten oder Knicke prüfen.,,
+P01,P01-S2,2,"Do a cold pull: heat to 250 °C, push filament, cool to 90 °C, pull out firmly.","Cold Pull durchführen: auf 250 °C heizen, Filament nachschieben, auf 90 °C abkühlen, kräftig herausziehen.",,
+P01,P01-S3,3,Clear the nozzle tip with the cleaning needle from the accessory box while hot.,Düsenspitze im heißen Zustand mit der Reinigungsnadel aus dem Zubehör freimachen.,,
+P01,P01-S4,4,Check the extruder gears for filament dust and clean them.,Extruderzahnräder auf Filamentabrieb prüfen und reinigen.,extruder,gear
+P01,P01-S5,5,Replace the hotend (quick-swap) with a new one.,Hotend (Schnellwechsel) gegen ein neues tauschen.,hotend,
+P02,P02-S1,1,"For PLA, open the front door or remove the top glass to keep the chamber cool.","Bei PLA die Fronttür öffnen oder den Glasdeckel abnehmen, damit die Kammer kühl bleibt.",,
+P02,P02-S2,2,Check that the hotend cooling fan spins freely at full speed.,"Prüfen, ob der Hotend-Lüfter frei und mit voller Drehzahl läuft.",,
+P02,P02-S3,3,Do a cold pull to clear the softened plug.,"Cold Pull durchführen, um den erweichten Pfropfen zu entfernen.",,
+P02,P02-S4,4,Replace the hotend cooling fan.,Hotend-Lüfter tauschen.,fan,hotend
+P03,P03-S1,1,"Wash the build plate with warm water and dish soap, dry without touching the surface.","Druckplatte mit warmem Wasser und Spülmittel waschen, trocknen, Oberfläche nicht anfassen.",,
+P03,P03-S2,2,Apply a thin layer of glue stick (required on cool/engineering plates).,Dünn Klebestift auftragen (bei Cool-/Engineering-Platte nötig).,,
+P03,P03-S3,3,Check that the plate type selected in Bambu Studio matches the plate on the printer.,"Prüfen, ob die in Bambu Studio gewählte Platte der eingelegten entspricht.",,
+P03,P03-S4,4,Run bed levelling and flow calibration again.,Bettnivellierung und Flusskalibrierung erneut ausführen.,,
+P03,P03-S5,5,Replace a worn build plate (shiny or scratched PEI).,Abgenutzte Druckplatte ersetzen (glänzendes oder zerkratztes PEI).,plate,
+P04,P04-S1,1,Close the door and preheat the chamber with the bed at 100 °C for 10 minutes.,Tür schließen und Kammer 10 Minuten mit Bett auf 100 °C vorheizen.,,
+P04,P04-S2,2,Add a brim (5-8 mm) in the slicer.,Im Slicer eine Brim (5-8 mm) hinzufügen.,,
+P04,P04-S3,3,"Dry the filament (ABS 80 °C, 8 h) before printing.","Filament vor dem Druck trocknen (ABS 80 °C, 8 h).",,
+P04,P04-S4,4,Switch to the Engineering Plate with glue stick.,Auf die Engineering-Platte mit Klebestift wechseln.,plate,engineering
+P05,P05-S1,1,Check that the spool turns freely and the filament end is not tangled or wound under.,"Prüfen, ob die Spule frei dreht und das Filament nicht verknotet oder untergewickelt ist.",,
+P05,P05-S2,2,Cut the filament tip at an angle and reload the slot.,Filamentspitze schräg abschneiden und Slot neu laden.,,
+P05,P05-S3,3,Check every PTFE tube connection for gaps or sharp bends.,Alle PTFE-Schlauchverbindungen auf Spalten oder scharfe Knicke prüfen.,ptfe,
+P05,P05-S4,4,Open the AMS and clear debris from the feeder and extrusion wheels.,AMS öffnen und Feeder sowie Förderräder von Abrieb befreien.,,
+P05,P05-S5,5,Replace the AMS feeder unit of the affected slot.,Feeder-Einheit des betroffenen Slots tauschen.,ams,feeder
+P06,P06-S1,1,Push the cutter lever by hand and check that it moves and springs back.,"Schneidhebel von Hand drücken und prüfen, ob er sich bewegt und zurückfedert.",,
+P06,P06-S2,2,Replace the cutter blade.,Schneidklinge tauschen.,cutter,replacement filament cutter
+P06,P06-S3,3,Replace the cutter lever.,Schneidhebel tauschen.,cutter,lever
+P07,P07-S1,1,Power off and reseat the hotend cable and connectors.,"Ausschalten, Hotend-Kabel und Stecker neu einstecken.",,
+P07,P07-S2,2,Update the printer firmware and run the self-test.,Firmware aktualisieren und Selbsttest ausführen.,,
+P07,P07-S3,3,Replace the heater and thermistor (or the heating assembly on A1).,Heizelement und Thermistor tauschen (beim A1 die Heizbaugruppe).,heater,
+P07,P07-S4,4,Replace the complete hotend.,Komplettes Hotend tauschen.,hotend,complete
+P08,P08-S1,1,Check belt tension with the built-in tension routine or by hand.,Riemenspannung prüfen (integrierte Routine oder von Hand).,,
+P08,P08-S2,2,Look for curled-up edges the nozzle could hit; enable avoid-crossing-walls.,"Auf hochstehende Kanten achten, gegen die die Düse stößt; Wände umfahren aktivieren.",,
+P08,P08-S3,3,Clean and lubricate the rods/rails.,Stangen/Schienen reinigen und schmieren.,,
+P08,P08-S4,4,Replace worn belts.,Verschlissene Riemen tauschen.,motion,belt
+P09,P09-S1,1,"Dry the filament (PETG 65 °C, 8 h; PLA 55 °C, 8 h).","Filament trocknen (PETG 65 °C, 8 h; PLA 55 °C, 8 h).",,
+P09,P09-S2,2,Lower the nozzle temperature by 5-10 °C and check retraction in the profile.,Düsentemperatur um 5-10 °C senken und Retraction im Profil prüfen.,,
+P09,P09-S3,3,Replace desiccant in the AMS.,Trockenmittel im AMS ersetzen.,ams,desiccant
+P09,P09-S4,4,Replace a worn nozzle.,Verschlissene Düse tauschen.,hotend,
+P10,P10-S1,1,Make sure the printer is on a 2.4 GHz network; separate the band if needed.,"Sicherstellen, dass der Drucker im 2,4-GHz-Netz ist; Band ggf. trennen.",,
+P10,P10-S2,2,"Restart router and printer, then rebind in Bambu Handy.","Router und Drucker neu starten, dann in Bambu Handy neu verbinden.",,
+P10,P10-S3,3,Update firmware and Bambu Studio to the latest version.,Firmware und Bambu Studio aktualisieren.,,
+P10,P10-S4,4,Use LAN-only mode with access code as a workaround.,Als Workaround den LAN-Modus mit Zugangscode nutzen.,,
+P11,P11-S1,1,Lower speed or max volumetric flow for this filament.,Geschwindigkeit oder max. Volumenfluss für dieses Filament senken.,,
+P11,P11-S2,2,Clear a partial clog with a cold pull.,Teilverstopfung per Cold Pull lösen.,,
+P11,P11-S3,3,Replace worn extruder gears.,Verschlissene Extruderzahnräder tauschen.,extruder,gear
+P11,P11-S4,4,Replace the extruder unit.,Extrudereinheit tauschen.,extruder,extruder unit
+P12,P12-S1,1,Remove filament strings or dust from the fan with compressed air.,Filamentfäden oder Staub mit Druckluft aus dem Lüfter entfernen.,,
+P12,P12-S2,2,Check the fan cable connection.,Lüfterkabel-Verbindung prüfen.,,
+P12,P12-S3,3,Replace the fan.,Lüfter tauschen.,fan,
+P13,P13-S1,1,Clean filament blobs off the nozzle tip (heat and wipe with a brass brush).,"Filamentreste von der Düsenspitze entfernen (heizen, mit Messingbürste abwischen).",,
+P13,P13-S2,2,Clean the plate and check it sits flat on all alignment pins.,"Platte reinigen und prüfen, ob sie flach an allen Führungsstiften anliegt.",,
+P13,P13-S3,3,Replace the nozzle wiper (A1) or purge wiper.,Düsenwischer (A1) bzw. Purge-Wischer tauschen.,wear,wiper
+P13,P13-S4,4,Update firmware and run full calibration.,Firmware aktualisieren und vollständige Kalibrierung ausführen.,,
+P14,P14-S1,1,Check the nozzle type set in the printer settings and in Bambu Studio.,Düsentyp in den Druckereinstellungen und in Bambu Studio prüfen.,,
+P14,P14-S2,2,Fit a hardened-steel hotend for CF/GF filaments.,Für CF/GF-Filamente ein Hotend mit gehärtetem Stahl einsetzen.,hotend,hardened

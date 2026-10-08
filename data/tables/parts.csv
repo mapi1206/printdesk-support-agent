@@ -1,0 +1,60 @@
+id,name,brand,official,cat,price,was,days,stock,reorder_level,compat
+BL-HE-A04H,"Hotend - A1/A2 Series, 0.4 mm hardened steel",Bambu Lab,True,hotend,12.99,,3,4,10,a1mini|a1|a2l
+BL-HEA-A1,Hotend Heating Assembly (A1 / A1 mini),Bambu Lab,True,heater,24.99,,3,3,10,a1mini|a1
+BL-HE-P04H,"Hotend - P1 Series, 0.4 mm hardened steel",Bambu Lab,True,hotend,16.49,,3,4,10,p1p|p1s
+BL-CHE-P04H,"Complete Hotend - P1 Series, 0.4 mm hardened steel (heater, thermistor, fan)",Bambu Lab,True,hotend,36.99,,3,6,5,p1p|p1s
+BL-CHE-X04H,"Complete Hotend - X1C, 0.4 mm hardened steel (heater, thermistor, fan)",Bambu Lab,True,hotend,36.99,,3,0,5,x1c
+BL-HE-H02S,"Hotend - H2/P2/X2D, 0.2 mm stainless steel",Bambu Lab,True,hotend,19.99,,3,2,10,p2s|x2d|h2d
+BL-HFHE-H2,High Flow Hotend - H2/P2 Series,Bambu Lab,True,hotend,52.99,,3,40,5,p2s|h2d
+BL-TCN-H2,High Flow Tungsten Carbide Nozzle - H2/P2S/X2D,Bambu Lab,True,hotend,99.99,,3,2,5,p2s|x2d|h2d
+BIQU-PJ-A1,"Panda Juicer Hotend SF, hardened steel 0.4 mm (A1 / A1 mini)",BIQU,False,hotend,8.99,,3,12,10,a1mini|a1
+BIQU-PJ-P2S,"Panda Juicer Hotend SF, hardened steel 0.4 mm (P2S)",BIQU,False,hotend,9.99,,19,60,10,p2s
+PH-CONCH-M4-A1,"Conch Hotend M4, 0.8 mm (A1 / A1 mini)",Phaetus,False,hotend,14.39,17.99,3,0,10,a1mini|a1
+PH-CONCH-M6-XP,"Conch Hotend M6, 0.4 mm (X1 / P1)",Phaetus,False,hotend,21.99,,3,40,10,x1c|p1p|p1s
+PH-CONCH-M4-P2S,"Conch Hotend M4, 0.4 mm (P2S)",Phaetus,False,hotend,23.99,,3,5,10,p2s
+PH-CONCH-M4-H2D,"Conch Hotend M4, 0.4 mm (H2D / A1 / A1 mini)",Phaetus,False,hotend,24.99,,3,0,10,h2d|a1mini|a1
+BROZZL-A1-04H,"Hot-End A1 Series, 0.4 mm hardened steel",BROZZL,False,hotend,25.99,,3,2,10,a1mini|a1
+BROZZL-AM-04H,"All Metal Hot-End, 0.4 mm hardened steel (X1 / P1)",BROZZL,False,hotend,25.99,,3,18,10,x1c|p1p|p1s
+MS-CHT-HF,"CHT High Flow Hotend, 0.4 mm (X1 / P1)",Micro-Swiss,False,hotend,49.99,,3,18,5,x1c|p1p|p1s
+E3D-OBX-A,"High Flow ObXidian HotEnd, 0.4 mm (A1 / A1 mini / A2L)",E3D,False,hotend,69.99,,3,2,5,a1mini|a1|a2l
+E3D-OBX-XP,"High Flow ObXidian HotEnd, 0.4 mm (X1 / P1)",E3D,False,hotend,89.99,,3,5,5,x1c|p1p|p1s
+MS-FT-P1,"FlowTech Hotend, CHT nozzle (P1P / P1S)",Micro-Swiss,False,hotend,85.49,94.99,3,2,5,p1p|p1s
+BL-CHT-P1,Ceramic Heater & Thermistor (P1P / P1S),Bambu Lab,True,heater,29.99,,3,40,10,p1p|p1s
+BL-FAN-HE-P1,Cooling Fan for Hotend (P1P / P1S),Bambu Lab,True,fan,14.99,,3,18,10,p1p|p1s
+BL-EXH-P2S,External Exhaust Fan Kit (P2S),Bambu Lab,True,fan,24.99,,3,0,10,p2s
+BL-THB-P2S,Toolhead Board (P2S),Bambu Lab,True,electronics,39.99,,3,60,5,p2s
+BL-BUS4,Bambu Bus Cable - 4 pin,Bambu Lab,True,electronics,5.99,,3,2,10,p1p|p1s|x1c
+BL-CAM-P2S,Live View Camera (P2S),Bambu Lab,True,electronics,35.99,39.99,3,5,5,p2s
+BL-EXT-P1,Extruder Unit (P1P / P1S),Bambu Lab,True,extruder,44.99,,3,60,5,p1p|p1s
+BL-EXG-HS,Hardened Steel Extruder Gear Assembly,Bambu Lab,True,extruder,21.49,,3,0,10,p1p|p1s|x1c
+BL-EFS-P1,Extruder Filament Sensor (P1P / P1S),Bambu Lab,True,sensor,14.99,,3,60,10,p1p|p1s
+BL-FS-A1,Filament Sensor (A1 / A1 mini),Bambu Lab,True,sensor,7.49,,3,60,10,a1mini|a1
+BL-CUT3,Replacement Filament Cutter (3 pcs),Bambu Lab,True,cutter,4.49,,3,4,10,a1mini|a1|p1p|p1s|x1c
+BL-CUTL,Filament Cutter Lever (X1 / P1),Bambu Lab,True,cutter,6.74,,3,0,10,p1p|p1s|x1c
+BL-SOCK-A1,"Hotend Silicone Sock (3 pcs, A1 / A1 mini)",Bambu Lab,True,wear,4.49,,3,5,10,a1mini|a1
+BL-WIPE-A1,Heatbed Nozzle Wiper (A1),Bambu Lab,True,wear,4.49,,3,0,10,a1
+BL-PWIPE-A1,Purge Wiper (A1 / A1 mini),Bambu Lab,True,wear,7.49,,3,40,10,a1mini|a1
+BL-XYB-P1,XY Belt (2 pcs),Bambu Lab,True,motion,15.99,,3,3,10,p1p|p1s|x1c
+BL-XB-A1,X Belt (A1),Bambu Lab,True,motion,8.99,,3,8,10,a1
+BL-YB-A1,Y Belt (A1),Bambu Lab,True,motion,8.99,,3,18,10,a1
+BL-IDP-P2S,Idler Pulley (P2S),Bambu Lab,True,motion,11.69,,3,3,10,p2s
+BL-AVF8,Anti-Vibration Feet (8 pcs),Bambu Lab,True,motion,14.99,,3,40,10,p1p|p1s|x1c
+BL-PTFE-HUB,PTFE Tube (AMS Hub),Bambu Lab,True,ptfe,11.99,,3,2,10,a1mini|a1
+BL-PTFE-CPL3,PTFE Tube Coupler (3 pcs),Bambu Lab,True,ptfe,7.49,,3,60,10,p1p|p1s|x1c
+BL-PTFE-CON-A1,PTFE Tube Connector (A1),Bambu Lab,True,ptfe,6.74,7.49,3,8,10,a1
+BL-4IN1,4-in-1 PTFE Adapter,Bambu Lab,True,ptfe,5.99,,3,40,10,a2l|p1p|p1s|x1c|p2s|x2d|h2d
+CAP-AMS-KIT,Capricorn Bambu Lab AMS Kit (low-friction PTFE),Capricorn,False,ptfe,29.99,,3,3,10,a1mini|a1|a2l|p1p|p1s|p2s|x1c|x2d|h2d
+BL-AMS-FEED,AMS Feeder Unit (AMS 2 Pro),Bambu Lab,True,ams,49.99,,3,2,5,p1s|p2s|x1c|x2d|h2d|a2l
+BL-AMSL-FEED,AMS lite Feeder Unit,Bambu Lab,True,ams,79.99,,3,60,5,a1mini|a1|a2l
+BL-AMS-HUB-INT,AMS Internal Hub Unit,Bambu Lab,True,ams,64.99,,3,60,5,p1p|p1s|x1c|a1
+BL-AMS-EXW,AMS Active Extrusion Wheel Assembly,Bambu Lab,True,ams,14.99,,3,5,10,p1p|p1s|x1c|a1
+BL-AMSL-HUB,AMS Lite Filament Hub,Bambu Lab,True,ams,8.99,,3,12,10,a1mini|a1|a2l
+BL-AMS-DES6,Desiccant for AMS (6 pcs),Bambu Lab,True,ams,5.99,,3,2,10,p1p|p1s|x1c|p2s|x2d|h2d|a2l|a1
+BL-AMS-MB,AMS Mainboard,Bambu Lab,True,ams,69.99,,3,40,5,p1p|p1s|x1c|a1
+BL-PLT-TPEI,Bambu Textured PEI Plate (256 mm),Bambu Lab,True,plate,49.99,,3,2,5,a1|p1p|p1s|p2s|x1c|x2d
+BL-PLT-DTPEI,Bambu Dual Texture PEI Plate (256 mm),Bambu Lab,True,plate,42.49,,3,60,5,a1|p1p|p1s|x1c
+BL-PLT-ENG,Engineering Plate (256 mm),Bambu Lab,True,plate,39.99,,3,0,5,a1|p1p|p1s|p2s|x1c|x2d
+BL-PLT-3DCF,3D Effect Plate Carbon Fiber (256 mm),Bambu Lab,True,plate,24.99,,3,60,10,a1|p1p|p1s|p2s|x1c|x2d
+BIQU-CRYO-256,Panda Build Plate CryoGrip Pro Glacier (256 mm),BIQU,False,plate,29.99,,3,5,10,a1|p1p|p1s|p2s|x1c|x2d
+PH-POPWEB-256,Arkfly POPweb Cool Plate (256 mm),Phaetus,False,plate,18.99,,3,25,10,a1|p1p|p1s|x1c
+BIQU-PYRO-H2,PyroGrip Build Plate (H2D / H2S),BIQU,False,plate,25.99,,3,40,10,h2d
