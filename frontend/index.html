@@ -804,7 +804,8 @@ function viewSupport(){
   const n=needsAction();
   const tabs=`<div class="subtabs" role="tablist">${[["inbox",t("inbox")+(n?` (${n})`:"")],["phone",t("phone")]].map(([k,l])=>`<button role="tab" aria-selected="${S.sup.tab===k}" data-sup="${k}">${l}</button>`).join("")}</div>`;
   if(S.sup.tab!=="phone"){ S.inboxSeen=true; queueMicrotask(autoTriage); }
-  return `<div style="margin-top:18px">${tabs}${S.sup.tab==="phone"?supPhone():supInbox()}</div>`;
+  const vis=VISITOR?`<div class="notice okn" style="margin:0 0 14px"><b>${t("visTitle")}.</b> ${t("visText")}</div>`:"";
+  return `<div style="margin-top:18px">${vis}${tabs}${S.sup.tab==="phone"?supPhone():supInbox()}</div>`;
 }
 
 /* ---------- priority: explainable score, not a black box */
@@ -856,7 +857,7 @@ function supInbox(){
   const addr=MAILBOXES.length;
   const gm=MAIL.state==="ok"?`<span class="pill good">✓ ${MAIL_LABEL}</span>`:`<span class="pill warn">${t("demoMode")}</span>`;
   const tools=`<div class="panel"><div class="row-actions" style="justify-content:space-between"><p class="label" style="margin:0">${t("inbox")}</p>${gm}</div>
-    ${mailboxPanel()}${MAIL.state==="ok"?"":
+    ${VISITOR?"":mailboxPanel()}${MAIL.state==="ok"||VISITOR?"":
       `<p class="muted" style="font-size:12px;margin:8px 0 0">${MAIL.state==="missing"||MAIL.state==="off"?t("demoNote"):esc(MAIL.err||t("demoNote"))}</p>`}
     ${MAIL.err&&MAIL.state==="ok"?`<div class="notice" style="font-size:13px">${esc(MAIL.err)}</div>`:""}
     <div class="row-actions" style="margin-top:10px">
@@ -1679,6 +1680,38 @@ function evalPanel(){
 document.addEventListener("click",e=>{ const b=e.target.closest("[data-eval]"); if(!b) return;
   if(b.dataset.eval==="run") runEval(); else if(b.dataset.eval==="stop"&&S.evalRun){ S.evalRun.stop=true; render(); } });
 
+/* ============================================================ visitor sandbox */
+// Only the owner (and editors) work on the shared data: real tickets, settings, the team.
+// Everyone else who opens a shared link gets a private, in-memory copy of the desk: they can load
+// the demo emails and watch the agent work, but nothing is saved, nothing is sent, and the shared
+// database is closed to them by the access rules declared at publish.
+let VISITOR=false;
+function sandboxDb(){
+  const docs=new Map(), subs=new Set();
+  const snapDoc=(id,d)=>({id,exists:d!==undefined,data:()=>d===undefined?undefined:structuredClone(d),metadata:{fromCache:false,hasPendingWrites:false}});
+  const notify=()=>queueMicrotask(()=>subs.forEach(f=>f()));
+  const docRef=path=>{ const id=path.slice(path.lastIndexOf("/")+1);
+    return {id,path,
+      async get(){ return snapDoc(id,docs.get(path)); },
+      async set(d){ docs.set(path,structuredClone(d)); notify(); },
+      async update(d){ if(!docs.has(path)) throw {code:"not_found",message:"no document"}; docs.set(path,{...docs.get(path),...structuredClone(d)}); notify(); },
+      async delete(){ docs.delete(path); notify(); },
+      async acquire(){ return {acquired:true,release:async()=>{}}; },
+      onSnapshot(next){ const f=()=>next(snapDoc(id,docs.get(path))); subs.add(f); f(); return ()=>subs.delete(f); }};
+  };
+  const collRef=c=>({path:c,
+    doc:id=>docRef(c+"/"+(id||"d"+Date.now().toString(36)+Math.random().toString(36).slice(2,7))),
+    async add(d){ const r=docRef(c+"/d"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)); await r.set(d); return r; },
+    onSnapshot(next){ const f=()=>{ const ds=[...docs.entries()].filter(([k])=>k.slice(0,k.lastIndexOf("/"))===c).map(([k,v])=>snapDoc(k.slice(k.lastIndexOf("/")+1),v)); next({docs:ds,size:ds.length,empty:!ds.length,metadata:{fromCache:false}}); }; subs.add(f); f(); return ()=>subs.delete(f); }});
+  return {collection:collRef, doc:docRef};
+}
+async function viewerCanUseSharedDesk(){
+  if(window.claude?.localMailLabel) return true;                 // local version: single user
+  try{ const u=await claude.use("user"); return u?await u.canEdit():false; }catch(_){ return false; }
+}
+Object.assign(T.en,{visTitle:"Demo view",visText:"You're looking at the PrintDesk agent in a private demo copy. Load the demo emails and watch the agent read, prioritise and answer them. Nothing you do here is saved or emailed, and the shop's real tickets aren't shown."});
+Object.assign(T.de,{visTitle:"Demo-Ansicht",visText:"Sie sehen den PrintDesk-Agenten in einer privaten Demo-Kopie. Laden Sie die Demo-E-Mails und sehen Sie zu, wie der Agent sie liest, priorisiert und beantwortet. Hier wird nichts gespeichert oder gemailt, und die echten Tickets des Shops werden nicht angezeigt."});
+
 /* ============================================================ safety & hygiene: injection guard, non-support filter, privacy, cleanup, overdue alerts */
 Object.assign(T.en,{stFiltered:"Not support",f_filtered:"Filtered",filteredWhy:"Set aside as not a support request: {r}",notSpam:"This is support – process it",
   injTitle:"Possible manipulation attempt",injText:"This email contains text that tries to instruct the agent ({r}). The agent treated it as data – check the reply carefully before approving.",
@@ -2078,8 +2111,11 @@ document.addEventListener("change",e=>{
   if(!window.claude) return;
   claude.use("sample").then(async s=>{ sample=s; if(s){ try{const l=await s.limits(); toolsOK=!!l.tools; imgOK=!!l.images; if(l.images) imgMax=Math.min(4,l.images.maxCount||4);}catch(_){toolsOK=false;} } render(); });
   setInterval(()=>{ maybeAutoSummary(); checkOverdue(); if(S.view==="support") render(); },5*60*1000);
-  claude.use("mcp").then(m=>initMail(m)).catch(()=>{});
-  claude.use("db").then(d=>{
+  const fullDesk=viewerCanUseSharedDesk();
+  fullDesk.then(full=>{ if(full) claude.use("mcp").then(m=>initMail(m)).catch(()=>{}); });
+  Promise.all([claude.use("db"),fullDesk]).then(([shared,full])=>{
+    const d=full?shared:(shared?sandboxDb():null);
+    if(!full&&d){ VISITOR=true; let v=null; try{v=localStorage.getItem("pd-view");}catch(_){} if(!v) S.view="support"; render(); }
     db=d; if(!d) return;
     d.doc("settings/mailboxes").onSnapshot(snap=>{
       const list=snap.exists&&Array.isArray(snap.data().list)?snap.data().list.filter(m=>m&&m.addr):[];
